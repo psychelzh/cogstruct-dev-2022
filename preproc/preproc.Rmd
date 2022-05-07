@@ -1,0 +1,233 @@
+---
+title: "Data Preparation"
+output: html_document
+# redirect output to another folder (default is base_dir/output)
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = fs::path(here::here(), "output"),
+      ...
+    )
+  })
+---
+
+```{r setup, include=FALSE}
+library(targets)
+knitr::opts_chunk$set(echo = TRUE, tar_interactive = FALSE)
+targets::tar_unscript()
+```
+
+```{targets utils, tar_globals=TRUE, include=FALSE}
+check_used_mouse <- function(raw_parsed) {
+  if (!has_name(raw_parsed, "device")) {
+    return(TRUE)
+  }
+  raw_parsed$device |> 
+    str_c(collapse = "-") |> 
+    str_split("-") |> 
+    map_lgl(~ any(.x == "mouse"))
+}
+check_version <- function(raw_parsed, game_name) {
+  if (game_name == "各得其所") {
+    return(has_name(raw_parsed, "minmove"))
+  }
+  if (game_name == "小狗回家") {
+    return(has_name(raw_parsed, "escortscore"))
+  } 
+  if (game_name %in% c("格子卡片", "美术卡片", "数字卡片", "文字卡片")) {
+    return(any(raw_parsed$type == "lure"))
+  }
+  return(TRUE)
+}
+validate_raw_parsed <- function(data_parsed, games_req_kb) {
+  data_parsed |> 
+    mutate(
+      valid_device = map2_lgl(
+        raw_parsed, game_name,
+        ~ !(check_used_mouse(.x) & .y %in% games_req_kb)
+      ),
+      valid_version = map2_lgl(
+        raw_parsed, game_name,
+        check_version
+      ),
+      valid = valid_device & valid_version
+    )
+}
+clean_indices <- function(indices) {
+  indices |> 
+    left_join(data.iquizoo::game_info, by = c("game_id", "game_name")) |> 
+    group_by(user_id, game_name) |> 
+    filter(
+      if_else(
+        str_detect(game_name_abbr, "[A|B]$"), 
+        row_number(desc(game_time)) == 1,
+        row_number(desc(game_time)) <= 2
+      )
+    ) |> 
+    ungroup() |> 
+    mutate(
+      indices_longer = map(
+        indices,
+        ~ pivot_longer(
+          .x,
+          cols = everything(),
+          names_to = "index_name",
+          values_to = "score"
+        )
+      ),
+      .keep = "unused"
+    ) |> 
+    unnest(indices_longer) |> 
+    group_by(user_id, game_name_abbr, game_name, game_version, index_name) |> 
+    mutate(
+      occasion = case_when(
+        str_detect(game_name_abbr, "A$") ~ "test",
+        str_detect(game_name_abbr, "B$") ~ "retest",
+        row_number(game_time) == 1 ~ "test",
+        TRUE ~ "retest"
+      ) |> 
+        factor(c("test", "retest"))
+    ) |> 
+    ungroup() |> 
+    mutate(across(starts_with("game_name"), ~ str_remove(.x, "[A|B]$"))) |>
+    pivot_wider(
+      id_cols = c(user_id, game_name, game_name_abbr, game_version, index_name), 
+      names_from = occasion,
+      values_from = score
+    )
+}
+clean_indices_halves <- function(indices) {
+  indices |> 
+    left_join(data.iquizoo::game_info, by = c("game_id", "game_name")) |> 
+    group_by(user_id, game_name) |> 
+    filter(
+      if_else(
+        str_detect(game_name_abbr, "[A|B]$"), 
+        row_number(desc(game_time)) == 1,
+        row_number(desc(game_time)) <= 2
+      )
+    ) |> 
+    ungroup() |> 
+    mutate(
+      indices_longer = map(
+        indices,
+        ~ pivot_longer(
+          .x,
+          cols = everything(),
+          names_to = "index_name",
+          values_to = "score"
+        )
+      ),
+      .keep = "unused"
+    ) |> 
+    unnest(indices_longer) |> 
+    group_by(user_id, game_name_abbr, game_name, game_version, index_name) |> 
+    mutate(
+      occasion = recode_factor(
+        row_number(game_time),
+        `1` = "test",
+        `2` = "retest"
+      )
+    ) |> 
+    ungroup() |> 
+    pivot_wider(
+      id_cols = c(user_id, game_name, game_name_abbr, game_version, index_name), 
+      names_from = occasion,
+      values_from = score
+    )
+}
+```
+
+```{targets set-globals, tar_globals=TRUE, include=FALSE}
+future::plan(future.callr::callr)
+tar_option_set(
+  package = c("tidyverse", "preproc.iquizoo", "tarflow.iquizoo"),
+  format = "qs",
+  imports = "preproc.iquizoo"
+)
+games <- tarflow.iquizoo::search_games_mem(config::get("where"))
+targets_data <- tarchetypes::tar_map(
+  values = games,
+  names = game_name_abbr,
+  # major targets
+  tar_target(data, pickup(query_tmpl_data, config_where_single_game)),
+  tar_target(data_parsed, wrangle_data(data)),
+  tar_target(
+    data_valid,
+    semi_join(data_parsed, filter(raw_validation, valid))
+  ),
+  tar_target(
+    indices,
+    preproc_data(data_valid, prep_fun, .input = input, .extra = extra)
+  ),
+  tar_target(
+    data_valid_even,
+    data_valid |>
+      mutate(raw_parsed = map(raw_parsed, ~ slice(., seq(2, n(), 2))))
+  ),
+  tar_target(
+    data_valid_odd,
+    data_valid |>
+      mutate(raw_parsed = map(raw_parsed, ~ slice(., seq(1, n(), 2))))
+  ),
+  tar_target(
+    indices_even,
+    preproc_data(data_valid_even, prep_fun, .input = input, .extra = extra)
+  ),
+  tar_target(
+    indices_odd,
+    preproc_data(data_valid_odd, prep_fun, .input = input, .extra = extra)
+  ),
+  # configurations
+  tar_target(
+    config_where_single_game,
+    insert_where_single_game(config_where, game_id)
+  ),
+  tar_target(raw_validation, validate_raw_parsed(data_parsed, games_req_kb))
+)
+```
+
+```{targets load-config, include=FALSE}
+list(
+  tar_target(file_config, "config.yml", format = "file"),
+  tar_target(config_where, config::get("where", file = file_config)),
+  tar_target(games_req_kb, config::get("require_keyboard", file = file_config))
+)
+```
+
+```{targets download-users, include=FALSE}
+list(
+  tar_target(query_tmpl_users, fs::path("sql", "users.tmpl.sql"), format = "file"),
+  tar_target(users, tarflow.iquizoo::pickup(query_tmpl_users, config_where))
+)
+```
+
+```{targets data-and-scores, include=FALSE}
+list(
+  tar_target(query_tmpl_data, fs::path("sql", "data.tmpl.sql"), format = "file"),
+  targets_data,
+  tarchetypes::tar_combine(
+    data_valid,
+    targets_data[[3]]
+  ),
+  tarchetypes::tar_combine(
+    indices,
+    targets_data[[4]]
+  ),
+  tarchetypes::tar_combine(
+    indices_even,
+    targets_data[[7]]
+  ),
+  tarchetypes::tar_combine(
+    indices_odd,
+    targets_data[[8]]
+  ),
+  tar_target(indices_clean, clean_indices(indices)),
+  tar_target(indices_clean_even, clean_indices_halves(indices_even)),
+  tar_target(indices_clean_odd, clean_indices_halves(indices_odd))
+)
+```
+
+```{r run-pipeline, include=FALSE}
+tar_make_future(workers = 20)
+```
