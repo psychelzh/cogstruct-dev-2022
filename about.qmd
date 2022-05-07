@@ -1,0 +1,19 @@
+---
+title: "About"
+image: profile.svg
+about:
+  template: jolla
+  links:
+    - icon: twitter
+      text: Twitter
+      href: https://twitter.com/psychelzh
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/psychelzh/
+    - icon: github
+      text: Github
+      href: https://github.com/psychelzh
+
+---
+
+We are from Beijing Normal University. We have developed more than 50 tasks based on psychological paradigms, in order to explore the structure of human cognition.
