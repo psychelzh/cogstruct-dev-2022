@@ -239,6 +239,14 @@ list(
     c("数字推理", "文字推理", "数字推理A", "数字推理B", "文字推理A", "文字推理B")
   ),
   tar_target(
+    item_keys,
+    tarflow.iquizoo::pickup(
+      "SELECT * 
+      FROM iquizoo_content_db.primarykey_question"
+    ) |> 
+      mutate(NewId = bit64::as.character.integer64(NewId))
+  ),
+  tar_target(
     data_valid_final,
     data_valid |>
       group_by(game_name) |>
@@ -329,12 +337,15 @@ list(
           "prac", "test", ""
         )
       ) |>
+      left_join(item_keys, by = c("itemid" = "Id")) |> 
+      mutate(itemid = coalesce(NewId, itemid)) |> 
       group_by(user_id, game_id) |>
       mutate(item = row_number(itemid)) |>
       ungroup() |>
       group_by(game_name, game_name_abbr, game_version, block) |>
       group_modify(
-        ~ .x |>
+        possibly(
+         ~ . |>
           pivot_wider(
             id_cols = user_id,
             names_from = item,
@@ -343,7 +354,9 @@ list(
           select(-user_id) |>
           psych::alpha(warnings = FALSE) |>
           pluck("total", "std.alpha") |>
-          as_tibble_col(column_name = "alpha")
+          as_tibble_col(column_name = "alpha"),
+          otherwise = tibble(alpha = NA_real_)
+        )
       ) |>
       ungroup() |>
       mutate(game_name_origin = game_name) |>
@@ -447,7 +460,7 @@ list(
       select(game_name_origin, everything())
   ),
   tar_target(
-    file_reliability, 
+    file_reliability,
     writexl::write_xlsx(reliability, here::here("output/reliability.xlsx"))
   )
 )
