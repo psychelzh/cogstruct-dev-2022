@@ -6,3 +6,5 @@
 /.quarto/
 _targets
 */_targets*
+*_cache/
+*_files/

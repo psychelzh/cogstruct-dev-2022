@@ -1,0 +1,51 @@
+[
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "We are from Beijing Normal University. We have developed more than 50 tasks based on psychological paradigms, in order to explore the structure of human cognition."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Cognitive Structure Project",
+    "section": "",
+    "text": "structure\n\n\nwm\n\n\n\n\n\n\n\n\n\n\n\nMay 9, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ndata-check\n\n\n\n\n\n\n\n\n\n\n\nMay 7, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/check-raw-data/index.html",
+    "href": "posts/check-raw-data/index.html",
+    "title": "Check Raw Data",
+    "section": "",
+    "text": "Code\ntargets::tar_load(data_valid_FWSPro, store = here::here(\"preproc/_targets\"))\nchrs_freq <- read_tsv(\"CharFreq.txt\", skip = 5)\nchrs_used <- readxl::read_excel(\"过目不忘-汉字库.xlsx\") |>\n  left_join(chrs_freq, by = \"汉字\")\ndata_adj_acc <- data_valid_FWSPro |>\n  unnest(raw_parsed) |>\n  group_by(user_id, game_time) |>\n  mutate(trial = row_number()) |>\n  ungroup() |>\n  mutate(\n    across(\n      c(stim, resp),\n      str_split,\n      pattern = \"-\"\n    )\n  ) |>\n  unnest(c(stim, resp)) |>\n  left_join(\n    select(chrs_used, stim = 汉字, stim_id = ID, stim_freq = 序列号),\n    by = \"stim\"\n  ) |>\n  left_join(\n    select(chrs_used, resp = 汉字, resp_id = ID),\n    by = \"resp\"\n  ) |>\n  separate(stim_id, c(\"stim_phon\", \"stim_form\"), convert = TRUE) |>\n  separate(resp_id, c(\"resp_phon\", \"resp_form\"), convert = TRUE) |>\n  mutate(\n    acc = case_when(\n      stim == resp ~ \"正确\",\n      stim_phon == resp_phon ~ \"同音字\",\n      stim_phon != resp_phon ~ \"错误\"\n    )\n  )\ndata_adj_acc |>\n  group_by(stim, stim_phon, stim_freq, acc) |>\n  summarise(n = n(), .groups = \"drop_last\") |>\n  mutate(prop = n / sum(n)) |>\n  ungroup() |>\n  ggplot(aes(stim, prop, fill = acc)) +\n  geom_bar(stat = \"identity\") +\n  geom_text(\n    aes(label = scales::label_percent(accuracy = 1)(prop)),\n    position = position_stack(vjust = 0.5),\n    color = \"white\"\n  ) +\n  geom_text(\n    aes(label = stim_freq),\n    y = 0\n  ) +\n  scale_fill_brewer(palette = \"Accent\") +\n  facet_wrap(~ stim_phon, scales = \"free_x\", nrow = 1) +\n  labs(x = \"\", y = \"\", fill = \"\") +\n  # scale_y_continuous(expand = c(0, 0)) +\n  ggthemes::theme_hc() +\n  theme(\n    axis.text.x = element_text(family = \"SimHei\"),\n    legend.text = element_text(family = \"SimHei\")\n  )\n\n\n\n\n\nFigure 1: Homophone Selection Proportion"
+  },
+  {
+    "objectID": "posts/check-raw-data/index.html#schulte-grid-舒尔特方格",
+    "href": "posts/check-raw-data/index.html#schulte-grid-舒尔特方格",
+    "title": "Check Raw Data",
+    "section": "Schulte Grid (舒尔特方格)",
+    "text": "Schulte Grid (舒尔特方格)\n\n\nCode\ntargets::tar_load(data_valid_SchulteMed, store = here::here(\"preproc/_targets\"))\nrt_by_resp <- data_valid_SchulteMed |>\n  mutate(\n    raw_parsed = map(\n      raw_parsed,\n      ~ . |> mutate(resp = as.integer(resp))\n    )\n  ) |>\n  unnest(raw_parsed) |>\n  group_by(user_id, game_time) |>\n  mutate(resp_adj = ifelse(acc == 0, NA, resp)) |>\n  fill(resp_adj, .direction = \"up\") |>\n  ungroup() |>\n  drop_na() |>\n  group_by(user_id, game_version, game_time, resp_adj) |>\n  summarise(rt = sum(rt) / 1000, .groups = \"drop\") |>\n  filter(rt < 300)\nrt_by_resp |>\n  ggplot(aes(resp_adj, rt, color = game_version)) +\n  geom_point(shape = \".\") +\n  geom_smooth() +\n  scale_y_log10() +\n  scale_color_brewer(palette = \"Paired\") +\n  labs(x = \"\", y = \"Response Time (s)\", color = \"Version\") +\n  theme_minimal()"
+  },
+  {
+    "objectID": "posts/explore_structure/index.html",
+    "href": "posts/explore_structure/index.html",
+    "title": "Explore Cognitive Structure for Working Memory",
+    "section": "",
+    "text": "Code\nlibrary(tidyverse)\nlibrary(corrr)\nlibrary(BayesFM)\nThe include tasks:"
+  },
+  {
+    "objectID": "posts/explore_structure/index.html#traditional",
+    "href": "posts/explore_structure/index.html#traditional",
+    "title": "Explore Cognitive Structure for Working Memory",
+    "section": "Traditional",
+    "text": "Traditional\n\n\nCode\nnfactors_test <- psych::nfactors(indices_memory)\n\n\n\n\n\n\nCorrelated latent factors\n\n\n\nCode\nfit <- psych::fa(indices_memory, 3)\npsych::fa.diagram(fit)\n\n\n\n\n\n\nBifactor model\n\n\n\nCode\nfit_bifac <- psych::omega(indices_memory, 3, plot = FALSE)\npsych::omega.diagram(fit_bifac)"
+  },
+  {
+    "objectID": "posts/explore_structure/index.html#bayesian-factor-analysis",
+    "href": "posts/explore_structure/index.html#bayesian-factor-analysis",
+    "title": "Explore Cognitive Structure for Working Memory",
+    "section": "Bayesian Factor Analysis",
+    "text": "Bayesian Factor Analysis\n\n\nCode\nmcmc <- indices_memory |> \n  mutate(across(.fns = ~ scale(.)[, 1])) |> \n  befa(verbose = FALSE) |> \n  post.column.switch() |> \n  post.sign.switch()\n\n\n\n\nCode\nhppm <- summary(mcmc, what = \"hppm\")\nhppm |> \n  pluck(\"alpha\", \"m1\") |> \n  as_tibble(rownames = \"alpha_term\") |> \n  separate(alpha_term, c(NA, \"game_index\"), sep = \":\") |> \n  mutate(game_index = reorder(game_index, dedic)) |> \n  ggplot(aes(game_index, dedic)) +\n  geom_tile(aes(fill = mean)) +\n  geom_text(aes(label = round(mean, 2)), color = \"white\") +\n  scico::scale_fill_scico(palette = \"bam\", midpoint = 0, direction = -1) +\n  coord_fixed() +\n  theme_minimal(base_size = 18) +\n  labs(x = \"Term\", y = \"Factor\", \n       title = str_c(\"Posterior Probability: \", round(hppm$hppm$prob, 2), \n                     \", with \", hppm$hppm$nfac, \" factors\")) +\n  theme(axis.text.x = element_text(angle = 45, hjust = 1))"
+  }
+]

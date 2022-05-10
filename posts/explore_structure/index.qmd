@@ -1,0 +1,214 @@
+---
+title: "Explore Cognitive Structure for Working Memory"
+author: "Liang Zhang"
+date: "2022-05-09"
+draft: false
+format: 
+  html:
+    code-fold: true
+    toc: true
+    toc-location: left
+categories: [structure, wm]
+execute:
+  warning: false
+---
+
+```{r}
+#| label: setup
+library(tidyverse)
+library(corrr)
+library(BayesFM)
+```
+
+```{r}
+#| label: load-data
+#| cache: true
+targets::tar_load(users, store = here::here("preproc/_targets"))
+ind_filt <- readxl::read_excel(here::here("config/indices_filtering.xlsx"))
+dim_order <- c("attention", "multitask", "switching", "inhibition", 
+               "reasoning", "complex span", "working memory", "short term memory", 
+               "long term memory", "probability learning",
+               "speeded IP", "strategic IP", 
+               "perception", "math", "language")
+indices_clean <- targets::tar_read(indices_final, store = here::here("preproc/_targets")) |> 
+  full_join(ind_filt, by = c("game_name", "index_name")) |> 
+  filter(
+    !is.na(check_result) & check_result != "target-stash",
+    grade != "20220303级",
+    !game_name %in% c("文字推理", "数字推理")
+  ) |>
+  arrange(factor(dimension, dim_order)) |>
+  mutate(test = if_else(reversed, -test, test)) |>
+  group_by(game_name, index_name) |>
+  mutate(test = if_else(test %in% boxplot.stats(test)$out, NA_real_, test)) |> 
+  ungroup()
+indices_memory <- indices_clean |> 
+  filter(
+    dimension %in% c("complex span", "working memory", "short term memory", "long term memory"),
+    !game_name %in% c("言语记忆", "连续再认", "魔术师终极", "人工语言-中级", "图片记忆", "欢乐餐厅", "过目不忘PRO")
+  ) |>
+  add_count(user_id, game_name) |> 
+  mutate(
+    game_index = if_else(
+      n == 1, 
+      game_name, 
+      str_c(game_name, index_name, sep = "-")
+    )
+  ) |> 
+  pivot_wider(
+    id_cols = user_id,
+    names_from = game_index,
+    values_from = test
+  ) |> 
+  select(-user_id)
+```
+
+The include tasks: 
+
+`r str_c(str_c("* ", names(indices_memory)), collapse = "\n")`
+
+# Correlation Matrix
+
+```{r}
+#| fig-width: 10
+#| fig-height: 8
+correlate(indices_memory, quiet = TRUE) |> 
+  rearrange(method = "HC") |> 
+  stretch() |> 
+  mutate(across(c(x, y), as_factor)) |>
+  ggplot(aes(x, y)) +
+  geom_tile(aes(fill = r)) +
+  scico::scale_fill_scico(palette = "bam", midpoint = 0, direction = -1) +
+  coord_fixed() +
+  theme_minimal(base_size = 18) +
+  labs(x = "", y = "", fill = "Pearson's", color = "") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# Multidimensional Scaling
+
+```{r}
+mds <- indices_memory |> 
+  cor(use = "pairwise") |> 
+  smacof::sim2diss(to.dist = TRUE) |> 
+  smacof::mds(ndim = 2, type = "mspline")
+# plot(mds, plot.type = "Shepard", main = "Shepard Diagram (Ratio Transformation)")
+# par(family = "SimHei")
+plot(mds)
+```
+
+# Exploratory Factor Analysis
+
+## Traditional
+
+```{r}
+nfactors_test <- psych::nfactors(indices_memory)
+```
+
+* Correlated latent factors
+
+```{r}
+fit <- psych::fa(indices_memory, 3)
+psych::fa.diagram(fit)
+```
+
+* Bifactor model
+
+```{r}
+fit_bifac <- psych::omega(indices_memory, 3, plot = FALSE)
+psych::omega.diagram(fit_bifac)
+```
+
+## Bayesian Factor Analysis
+
+```{r}
+#| cache: true
+#| dependson: "load-data"
+mcmc <- indices_memory |> 
+  mutate(across(.fns = ~ scale(.)[, 1])) |> 
+  befa(verbose = FALSE) |> 
+  post.column.switch() |> 
+  post.sign.switch()
+```
+
+```{r}
+#| fig-width: 10
+#| fig-height: 6
+hppm <- summary(mcmc, what = "hppm")
+hppm |> 
+  pluck("alpha", "m1") |> 
+  as_tibble(rownames = "alpha_term") |> 
+  separate(alpha_term, c(NA, "game_index"), sep = ":") |> 
+  mutate(game_index = reorder(game_index, dedic)) |> 
+  ggplot(aes(game_index, dedic)) +
+  geom_tile(aes(fill = mean)) +
+  geom_text(aes(label = round(mean, 2)), color = "white") +
+  scico::scale_fill_scico(palette = "bam", midpoint = 0, direction = -1) +
+  coord_fixed() +
+  theme_minimal(base_size = 18) +
+  labs(x = "Term", y = "Factor", 
+       title = str_c("Posterior Probability: ", round(hppm$hppm$prob, 2), 
+                     ", with ", hppm$hppm$nfac, " factors")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# Confirmatory Factor Analysis
+
+```{r}
+#| fig-height: 10
+#| fig-width: 6
+fitted1 <- lavaan::cfa(
+  'Updating =~ `美术卡片` + `数字卡片` + `格子卡片` + `文字卡片`
+  # AscMem =~ `人工语言-中级` + `欢乐餐厅` + 图片记忆
+  VerbalSTM =~ `幸运小球` + `密码箱` + `顺背数PRO`
+  SpatialSTM =~ `宇宙黑洞` + `打靶场` + `蝴蝶照相机` + `位置记忆PRO`',
+  indices_memory, std.lv = TRUE, std.ov = TRUE
+)
+semPlot::semPaths(
+  fitted1, what = "std", edge.color = "black", rotation = 2,
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, 
+  nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0
+)
+lavaan::summary(fitted1, fit.measures = TRUE, estimates = FALSE)
+```
+
+<!-- ## No Associative Memory -->
+
+```{r}
+#| fig-height: 10
+#| fig-width: 6
+# fitted2 <- lavaan::cfa(
+#   'Updating =~ `美术卡片` + `数字卡片` + `格子卡片` + `文字卡片` + `魔术师终极`
+#   # AscMem =~ `人工语言-中级` + `欢乐餐厅` + 图片记忆
+#   VerbalSTM =~ `幸运小球` + `密码箱` + `过目不忘PRO` + `顺背数PRO`
+#   SpatialSTM =~ `宇宙黑洞` + `打靶场` + `蝴蝶照相机` + `位置记忆PRO`',
+#   indices_memory, std.lv = TRUE, std.ov = TRUE
+# )
+# semPlot::semPaths(
+#   fitted2, what = "std", edge.color = "black", rotation = 2,
+#   sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, 
+#   nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0
+# )
+# lavaan::summary(fitted2, fit.measures = TRUE, estimates = FALSE)
+```
+
+<!-- ## Input Material Model -->
+
+<!-- > Not fitted well. -->
+
+```{r}
+#| fig-height: 10
+#| fig-width: 6
+# fitted3 <- lavaan::cfa(
+#   'Verbal =~ 数字卡片 + 文字卡片 + 幸运小球 + 密码箱 + 过目不忘PRO + 顺背数PRO
+#   Spatial =~ 格子卡片 + 打靶场 + 蝴蝶照相机 + 位置记忆PRO
+#   Object =~ 美术卡片 + 宇宙黑洞 + 魔术师终极',
+#   indices_memory, std.lv = TRUE, std.ov = TRUE
+# )
+# semPlot::semPaths(
+#   fitted3, what = "std", edge.color = "black", rotation = 2,
+#   sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, 
+#   nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0
+# )
+# lavaan::summary(fitted3, fit.measures = TRUE, estimates = FALSE)
+```

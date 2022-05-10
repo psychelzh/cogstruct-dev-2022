@@ -1,0 +1,118 @@
+---
+title: "Check Raw Data"
+author: "Liang Zhang"
+date: "2022-05-07"
+draft: false
+format:
+  html:
+    code-fold: true
+categories: [data-check]
+execute:
+  warning: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(tidyverse)
+```
+
+## Forward Word Span (过目不忘)
+
+```{r}
+#| label: fig-homophone
+#| fig-cap: Homophone Selection Proportion
+#| fig-width: 15
+#| fig-height: 5
+#| cache: TRUE
+
+targets::tar_load(data_valid_FWSPro, store = here::here("preproc/_targets"))
+chrs_freq <- read_tsv("CharFreq.txt", skip = 5)
+chrs_used <- readxl::read_excel("过目不忘-汉字库.xlsx") |>
+  left_join(chrs_freq, by = "汉字")
+data_adj_acc <- data_valid_FWSPro |>
+  unnest(raw_parsed) |>
+  group_by(user_id, game_time) |>
+  mutate(trial = row_number()) |>
+  ungroup() |>
+  mutate(
+    across(
+      c(stim, resp),
+      str_split,
+      pattern = "-"
+    )
+  ) |>
+  unnest(c(stim, resp)) |>
+  left_join(
+    select(chrs_used, stim = 汉字, stim_id = ID, stim_freq = 序列号),
+    by = "stim"
+  ) |>
+  left_join(
+    select(chrs_used, resp = 汉字, resp_id = ID),
+    by = "resp"
+  ) |>
+  separate(stim_id, c("stim_phon", "stim_form"), convert = TRUE) |>
+  separate(resp_id, c("resp_phon", "resp_form"), convert = TRUE) |>
+  mutate(
+    acc = case_when(
+      stim == resp ~ "正确",
+      stim_phon == resp_phon ~ "同音字",
+      stim_phon != resp_phon ~ "错误"
+    )
+  )
+data_adj_acc |>
+  group_by(stim, stim_phon, stim_freq, acc) |>
+  summarise(n = n(), .groups = "drop_last") |>
+  mutate(prop = n / sum(n)) |>
+  ungroup() |>
+  ggplot(aes(stim, prop, fill = acc)) +
+  geom_bar(stat = "identity") +
+  geom_text(
+    aes(label = scales::label_percent(accuracy = 1)(prop)),
+    position = position_stack(vjust = 0.5),
+    color = "white"
+  ) +
+  geom_text(
+    aes(label = stim_freq),
+    y = 0
+  ) +
+  scale_fill_brewer(palette = "Accent") +
+  facet_wrap(~ stim_phon, scales = "free_x", nrow = 1) +
+  labs(x = "", y = "", fill = "") +
+  # scale_y_continuous(expand = c(0, 0)) +
+  ggthemes::theme_hc() +
+  theme(
+    axis.text.x = element_text(family = "SimHei"),
+    legend.text = element_text(family = "SimHei")
+  )
+```
+
+## Schulte Grid (舒尔特方格)
+
+```{r}
+targets::tar_load(data_valid_SchulteMed, store = here::here("preproc/_targets"))
+rt_by_resp <- data_valid_SchulteMed |>
+  mutate(
+    raw_parsed = map(
+      raw_parsed,
+      ~ . |> mutate(resp = as.integer(resp))
+    )
+  ) |>
+  unnest(raw_parsed) |>
+  group_by(user_id, game_time) |>
+  mutate(resp_adj = ifelse(acc == 0, NA, resp)) |>
+  fill(resp_adj, .direction = "up") |>
+  ungroup() |>
+  drop_na() |>
+  group_by(user_id, game_version, game_time, resp_adj) |>
+  summarise(rt = sum(rt) / 1000, .groups = "drop") |>
+  filter(rt < 300)
+rt_by_resp |>
+  ggplot(aes(resp_adj, rt, color = game_version)) +
+  geom_point(shape = ".") +
+  geom_smooth() +
+  scale_y_log10() +
+  scale_color_brewer(palette = "Paired") +
+  labs(x = "", y = "Response Time (s)", color = "Version") +
+  theme_minimal()
+```
