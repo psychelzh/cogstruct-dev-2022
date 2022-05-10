@@ -1,0 +1,14 @@
+{
+  "hash": "81252da33a2435ed0b99e77a19d4ece7",
+  "result": {
+    "markdown": "---\ntitle: \"Explore Cognitive Structure for Working Memory\"\nauthor: \"Liang Zhang\"\ndate: \"2022-05-09\"\ndraft: false\nformat: \n  html:\n    code-fold: true\n    toc: true\n    toc-location: left\ncategories: [structure, wm]\nexecute:\n  warning: false\n---\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(tidyverse)\nlibrary(corrr)\nlibrary(BayesFM)\nlibrary(reshape2)\nlibrary(RColorBrewer)\nlibrary(ggplot2)\nlibrary(viridis)\nlibrary(psych)\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\ntotal_matrix <- fs::dir_ls(path = \"/Users/caoyifei/Desktop/testGithub/cogstruct-dev/posts/Large-scale meta analysis\",\n                       regexp = \"xlsx\") %>% \n  map(readxl::read_xlsx, col_names = TRUE) %>% \n  reduce(left_join, by = \"voxel_num\")\n```\n:::\n\n\n::: {.cell}\n\n```{.r .cell-code}\ntotal_nonzero <- total_matrix[which(rowSums(total_matrix) > 0),] %>% \n  select(-voxel_num)\ncor_total <- round(cor(total_matrix),2)\ncor_nonzero <- round(cor(total_nonzero),2)\nmelted_cor_nonzero <- melt(cor_nonzero) %>% \n mutate(percrank=rank(value)/length(value))\n\ncorrelate(total_nonzero, quiet = TRUE) |>\n  rearrange(method = \"HC\") |>\n  stretch() |>\n  mutate(across(c(x, y), as_factor)) |>\n  ggplot(aes(x, y)) +\n  geom_tile(aes(fill = r)) +\n  scico::scale_fill_scico(palette = \"bam\", midpoint = 0, direction = -1) +\n  coord_fixed() +\n  theme_minimal(base_size = 18) +\n  labs(x = \"\", y = \"\", fill = \"Pearson's\", color = \"\") +\n  theme(axis.text.x = element_text(angle = 45, hjust = 1))\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-3-1.png){width=960}\n:::\n\n```{.r .cell-code}\n# ggplot(data = melted_cor_nonzero, aes(Var2, Var1, fill = percrank))+\n#  geom_tile(color = \"black\")+\n#   scale_fill_viridis(discrete=FALSE)+\n#   theme_minimal()+ \n#  theme(axis.text.x = element_text(angle = 45, vjust = 1, \n#     size = 7, hjust = 1),\n#     axis.text.y = element_text(size = 7))+\n#  coord_fixed()\n```\n:::\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": [],
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": null
+  }
+}
