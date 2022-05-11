@@ -11,7 +11,7 @@
     "href": "index.html",
     "title": "Cognitive Structure Project",
     "section": "",
-    "text": "structure\n\n\nwm\n\n\n\n\n\n\n\n\n\n\n\nMay 9, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ndata-check\n\n\n\n\n\n\n\n\n\n\n\nMay 7, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\nNo matching items"
+    "text": "structure\n\n\ncognition\n\n\nmeta-analysis\n\n\n\n\n\n\n\n\n\n\n\nMay 10, 2022\n\n\nYifei Cao, Liang Zhang\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nstructure\n\n\nwm\n\n\n\n\n\n\n\n\n\n\n\nMay 9, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ndata-check\n\n\n\n\n\n\n\n\n\n\n\nMay 7, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/check-raw-data/index.html",
@@ -47,5 +47,19 @@
     "title": "Explore Cognitive Structure for Working Memory",
     "section": "Bayesian Factor Analysis",
     "text": "Bayesian Factor Analysis\n\n\nCode\nmcmc <- indices_memory |> \n  mutate(across(.fns = ~ scale(.)[, 1])) |> \n  befa(verbose = FALSE) |> \n  post.column.switch() |> \n  post.sign.switch()\n\n\n\n\nCode\nhppm <- summary(mcmc, what = \"hppm\")\nhppm |> \n  pluck(\"alpha\", \"m1\") |> \n  as_tibble(rownames = \"alpha_term\") |> \n  separate(alpha_term, c(NA, \"game_index\"), sep = \":\") |> \n  mutate(game_index = reorder(game_index, dedic)) |> \n  ggplot(aes(game_index, dedic)) +\n  geom_tile(aes(fill = mean)) +\n  geom_text(aes(label = round(mean, 2)), color = \"white\") +\n  scico::scale_fill_scico(palette = \"bam\", midpoint = 0, direction = -1) +\n  coord_fixed() +\n  theme_minimal(base_size = 18) +\n  labs(x = \"Term\", y = \"Factor\", \n       title = str_c(\"Posterior Probability: \", round(hppm$hppm$prob, 2), \n                     \", with \", hppm$hppm$nfac, \" factors\")) +\n  theme(axis.text.x = element_text(angle = 45, hjust = 1))"
+  },
+  {
+    "objectID": "posts/Large-scale meta analysis/index.html",
+    "href": "posts/Large-scale meta analysis/index.html",
+    "title": "Extracting Cognitive Factors from Large-Scale Meta-Anslysis Data",
+    "section": "",
+    "text": "To summarize briefly, I followed the step of Beam et al. (2021, Nature Neuroscience) to find evidence for the structure of human cognition. Firstly, filtering all studies that included the testing paradigms that consisted with those used in our project from the database of Neurosynth, I conducted 28 meta-analysis separately on each group of fMRI studies. Thanks to NiMARE (a python research environment for neuroimaging meta-analysis), I could easily perform Multilevel Kernel Density Analysis (MKDA) on hundreds fMRI studies without manually coding.\nHere is the summarize table for the number of included fMRI studies in each meta-analysis."
+  },
+  {
+    "objectID": "posts/Large-scale meta analysis/index.html#traditional",
+    "href": "posts/Large-scale meta analysis/index.html#traditional",
+    "title": "Extracting Cognitive Factors from Large-Scale Meta-Anslysis Data",
+    "section": "Traditional",
+    "text": "Traditional\n\n\nCode\nnfactors_test <- psych::nfactors(cor_nonzero)\n\n\n\n\n\n\nCorrelated latent factors\n\n\n\nCode\nfit <- psych::fa(cor_nonzero, 4)\npsych::fa.diagram(fit)\n\n\n\n\n\n\nBifactor model\n\n\n\nCode\nfit_bifac <- psych::omega(total_nonzero, 3, plot = FALSE)\npsych::omega.diagram(fit_bifac)"
   }
 ]
