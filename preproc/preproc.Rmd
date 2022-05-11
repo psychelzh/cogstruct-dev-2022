@@ -1,6 +1,8 @@
 ---
 title: "Data Preparation"
 output: html_document
+execute: 
+  freeze: true
 # redirect output to another folder (default is base_dir/output)
 knit: (function(input, ...) {
     rmarkdown::render(
@@ -22,9 +24,9 @@ check_used_mouse <- function(raw_parsed) {
   if (!has_name(raw_parsed, "device")) {
     return(TRUE)
   }
-  raw_parsed$device |> 
-    str_c(collapse = "-") |> 
-    str_split("-") |> 
+  raw_parsed$device |>
+    str_c(collapse = "-") |>
+    str_split("-") |>
     map_lgl(~ any(.x == "mouse"))
 }
 check_version <- function(raw_parsed, game_name) {
@@ -33,14 +35,14 @@ check_version <- function(raw_parsed, game_name) {
   }
   if (game_name == "小狗回家") {
     return(has_name(raw_parsed, "escortscore"))
-  } 
+  }
   if (game_name %in% c("格子卡片", "美术卡片", "数字卡片", "文字卡片")) {
     return(any(raw_parsed$type == "lure"))
   }
   return(TRUE)
 }
 validate_raw_parsed <- function(data_parsed, games_req_kb) {
-  data_parsed |> 
+  data_parsed |>
     mutate(
       valid_device = map2_lgl(
         raw_parsed, game_name,
@@ -54,17 +56,17 @@ validate_raw_parsed <- function(data_parsed, games_req_kb) {
     )
 }
 clean_indices <- function(indices) {
-  indices |> 
-    left_join(data.iquizoo::game_info, by = c("game_id", "game_name")) |> 
-    group_by(user_id, game_name) |> 
+  indices |>
+    left_join(data.iquizoo::game_info, by = c("game_id", "game_name")) |>
+    group_by(user_id, game_name) |>
     filter(
       if_else(
-        str_detect(game_name_abbr, "[A|B]$"), 
+        str_detect(game_name_abbr, "[A|B]$"),
         row_number(desc(game_time)) == 1,
         row_number(desc(game_time)) <= 2
       )
-    ) |> 
-    ungroup() |> 
+    ) |>
+    ungroup() |>
     mutate(
       indices_longer = map(
         indices,
@@ -76,38 +78,38 @@ clean_indices <- function(indices) {
         )
       ),
       .keep = "unused"
-    ) |> 
-    unnest(indices_longer) |> 
-    group_by(user_id, game_name_abbr, game_name, game_version, index_name) |> 
+    ) |>
+    unnest(indices_longer) |>
+    group_by(user_id, game_name_abbr, game_name, game_version, index_name) |>
     mutate(
       occasion = case_when(
         str_detect(game_name_abbr, "A$") ~ "test",
         str_detect(game_name_abbr, "B$") ~ "retest",
         row_number(game_time) == 1 ~ "test",
         TRUE ~ "retest"
-      ) |> 
+      ) |>
         factor(c("test", "retest"))
-    ) |> 
-    ungroup() |> 
+    ) |>
+    ungroup() |>
     mutate(across(starts_with("game_name"), ~ str_remove(.x, "[A|B]$"))) |>
     pivot_wider(
-      id_cols = c(user_id, game_name, game_name_abbr, game_version, index_name), 
+      id_cols = c(user_id, game_name, game_name_abbr, game_version, index_name),
       names_from = occasion,
       values_from = score
     )
 }
 clean_indices_halves <- function(indices) {
-  indices |> 
-    left_join(data.iquizoo::game_info, by = c("game_id", "game_name")) |> 
-    group_by(user_id, game_name) |> 
+  indices |>
+    left_join(data.iquizoo::game_info, by = c("game_id", "game_name")) |>
+    group_by(user_id, game_name) |>
     filter(
       if_else(
-        str_detect(game_name_abbr, "[A|B]$"), 
+        str_detect(game_name_abbr, "[A|B]$"),
         row_number(desc(game_time)) == 1,
         row_number(desc(game_time)) <= 2
       )
-    ) |> 
-    ungroup() |> 
+    ) |>
+    ungroup() |>
     mutate(
       indices_longer = map(
         indices,
@@ -119,19 +121,19 @@ clean_indices_halves <- function(indices) {
         )
       ),
       .keep = "unused"
-    ) |> 
-    unnest(indices_longer) |> 
-    group_by(user_id, game_name_abbr, game_name, game_version, index_name) |> 
+    ) |>
+    unnest(indices_longer) |>
+    group_by(user_id, game_name_abbr, game_name, game_version, index_name) |>
     mutate(
       occasion = recode_factor(
         row_number(game_time),
         `1` = "test",
         `2` = "retest"
       )
-    ) |> 
-    ungroup() |> 
+    ) |>
+    ungroup() |>
     pivot_wider(
-      id_cols = c(user_id, game_name, game_name_abbr, game_version, index_name), 
+      id_cols = c(user_id, game_name, game_name_abbr, game_version, index_name),
       names_from = occasion,
       values_from = score
     )
@@ -241,9 +243,9 @@ list(
   tar_target(
     item_keys,
     tarflow.iquizoo::pickup(
-      "SELECT * 
+      "SELECT *
       FROM iquizoo_content_db.primarykey_question"
-    ) |> 
+    ) |>
       mutate(NewId = bit64::as.character.integer64(NewId))
   ),
   tar_target(
@@ -337,8 +339,8 @@ list(
           "prac", "test", ""
         )
       ) |>
-      left_join(item_keys, by = c("itemid" = "Id")) |> 
-      mutate(itemid = coalesce(NewId, itemid)) |> 
+      left_join(item_keys, by = c("itemid" = "Id")) |>
+      mutate(itemid = coalesce(NewId, itemid)) |>
       group_by(user_id, game_id) |>
       mutate(item = row_number(itemid)) |>
       ungroup() |>
