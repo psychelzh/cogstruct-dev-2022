@@ -154,6 +154,12 @@ hppm |>
 
 # Confirmatory Factor Analysis
 
+## Model from EFA
+
+Firstly, the model from EFA is tested.
+
+* Spatial-object association test (宇宙黑洞) included
+
 ```{r}
 #| fig-height: 10
 #| fig-width: 6
@@ -172,43 +178,65 @@ semPlot::semPaths(
 lavaan::summary(fitted1, fit.measures = TRUE, estimates = FALSE)
 ```
 
-<!-- ## No Associative Memory -->
+* Spatial-object association test (宇宙黑洞) excluded
 
 ```{r}
 #| fig-height: 10
 #| fig-width: 6
-# fitted2 <- lavaan::cfa(
-#   'Updating =~ `美术卡片` + `数字卡片` + `格子卡片` + `文字卡片` + `魔术师终极`
-#   # AscMem =~ `人工语言-中级` + `欢乐餐厅` + 图片记忆
-#   VerbalSTM =~ `幸运小球` + `密码箱` + `过目不忘PRO` + `顺背数PRO`
-#   SpatialSTM =~ `宇宙黑洞` + `打靶场` + `蝴蝶照相机` + `位置记忆PRO`',
-#   indices_memory, std.lv = TRUE, std.ov = TRUE
-# )
-# semPlot::semPaths(
-#   fitted2, what = "std", edge.color = "black", rotation = 2,
-#   sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, 
-#   nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0
-# )
-# lavaan::summary(fitted2, fit.measures = TRUE, estimates = FALSE)
+fitted2 <- lavaan::cfa(
+  'Updating =~ `美术卡片` + `数字卡片` + `格子卡片` + `文字卡片`
+  # AscMem =~ `人工语言-中级` + `欢乐餐厅` + 图片记忆
+  VerbalSTM =~ `幸运小球` + `密码箱` + `顺背数PRO`
+  SpatialSTM =~ `打靶场` + `蝴蝶照相机` + `位置记忆PRO`',
+  indices_memory, std.lv = TRUE, std.ov = TRUE
+)
+semPlot::semPaths(
+  fitted2, what = "std", edge.color = "black", rotation = 2,
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, 
+  nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0
+)
+lavaan::summary(fitted2, fit.measures = TRUE, estimates = FALSE)
 ```
 
-<!-- ## Input Material Model -->
+## Task Structure Model
 
-<!-- > Not fitted well. -->
+> The covariance estimate for latent variables is not correct. The estimated correlation between "Simple" and "Complex" is `1.02`.
 
 ```{r}
 #| fig-height: 10
 #| fig-width: 6
-# fitted3 <- lavaan::cfa(
-#   'Verbal =~ 数字卡片 + 文字卡片 + 幸运小球 + 密码箱 + 过目不忘PRO + 顺背数PRO
-#   Spatial =~ 格子卡片 + 打靶场 + 蝴蝶照相机 + 位置记忆PRO
-#   Object =~ 美术卡片 + 宇宙黑洞 + 魔术师终极',
-#   indices_memory, std.lv = TRUE, std.ov = TRUE
-# )
-# semPlot::semPaths(
-#   fitted3, what = "std", edge.color = "black", rotation = 2,
-#   sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, 
-#   nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0
-# )
-# lavaan::summary(fitted3, fit.measures = TRUE, estimates = FALSE)
+fitted3 <- lavaan::cfa(
+  'Complex =~ `打靶场` + `蝴蝶照相机` + `幸运小球`
+  Nback =~ `美术卡片` + `数字卡片` + `格子卡片` + `文字卡片`
+  # AscMem =~ `人工语言-中级` + `欢乐餐厅` + 图片记忆
+  Simple =~ `密码箱` + `顺背数PRO` + `位置记忆PRO`',
+  indices_memory, std.lv = TRUE, std.ov = TRUE
+)
+semPlot::semPaths(
+  fitted3, what = "std", edge.color = "black", rotation = 2,
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6,
+  nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0
+)
+lavaan::summary(fitted3, fit.measures = TRUE, estimates = FALSE)
+```
+
+## Input Material Model
+
+> Not fitted well.
+
+```{r}
+#| fig-height: 10
+#| fig-width: 6
+fitted4 <- lavaan::cfa(
+  'Verbal =~ 数字卡片 + 文字卡片 + 幸运小球 + 密码箱 + 顺背数PRO
+  Spatial =~ 格子卡片 + 打靶场 + 蝴蝶照相机 + 位置记忆PRO
+  Object =~ 美术卡片 + 宇宙黑洞',
+  indices_memory, std.lv = TRUE, std.ov = TRUE
+)
+semPlot::semPaths(
+  fitted4, what = "std", edge.color = "black", rotation = 2,
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6,
+  nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0
+)
+lavaan::summary(fitted4, fit.measures = TRUE, estimates = FALSE)
 ```

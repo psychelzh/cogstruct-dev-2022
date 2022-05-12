@@ -194,9 +194,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
+<p>Here we check raw data from several special tasks. Especially check the factors influencing reliability, internal consistency of each task</p>
 <section id="forward-word-span-过目不忘" class="level2">
 <h2 class="anchored" data-anchor-id="forward-word-span-过目不忘">Forward Word Span (过目不忘)</h2>
-<div class="cell" data-hash="index_cache/html/fig-homophone_d8726ced4025dd1960b32e4eff62e987">
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-2_9b752102ac5454a2ac8cc881f93e336b">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">::</span><span class="fu">tar_load</span>(data_valid_FWSPro, <span class="at">store =</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"preproc/_targets"</span>))</span>
@@ -260,10 +261,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="fig-homophone" class="quarto-figure quarto-figure-center anchored">
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="index_files/figure-html/fig-homophone-1.png" class="img-fluid figure-img" width="1440"></p>
-<p></p><figcaption aria-hidden="true" class="figure-caption">Figure 1: Homophone Selection Proportion</figcaption><p></p>
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="1440"></p>
+<p></p><figcaption aria-hidden="true" class="figure-caption">Homophone Selection Proportion</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -304,6 +305,24 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<!-- ## Reasoning (推理类题目) -->
+<!-- ```{r} -->
+<!-- targets::tar_load(data_valid_DRA, store = here::here("preproc/_targets")) -->
+<!-- data_valid_DRA |>  -->
+<!--   filter(course_name == "清华大学认知实验D") |>  -->
+<!--   unnest(raw_parsed) |>  -->
+<!--   mutate(item = as.numeric(as_factor(itemid))) |>  -->
+<!--   # group_by(item) |>  -->
+<!--   # filter(between(mean(acc == 1), 0.6, 0.9)) |> -->
+<!--   # ungroup() |>  -->
+<!--   filter(acc != -1) |>  -->
+<!--   pivot_wider( -->
+<!--     id_cols = user_id, -->
+<!--     names_from = item, -->
+<!--     values_from = acc -->
+<!--   ) |>  -->
+<!--   psycModel::reliability_summary(-user_id) -->
+<!-- ``` -->
 
 
 </section>

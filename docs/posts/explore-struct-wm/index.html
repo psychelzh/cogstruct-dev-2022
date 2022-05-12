@@ -199,7 +199,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#traditional" id="toc-traditional" class="nav-link" data-scroll-target="#traditional">Traditional</a></li>
   <li><a href="#bayesian-factor-analysis" id="toc-bayesian-factor-analysis" class="nav-link" data-scroll-target="#bayesian-factor-analysis">Bayesian Factor Analysis</a></li>
   </ul></li>
-  <li><a href="#confirmatory-factor-analysis" id="toc-confirmatory-factor-analysis" class="nav-link" data-scroll-target="#confirmatory-factor-analysis">Confirmatory Factor Analysis</a></li>
+  <li><a href="#confirmatory-factor-analysis" id="toc-confirmatory-factor-analysis" class="nav-link" data-scroll-target="#confirmatory-factor-analysis">Confirmatory Factor Analysis</a>
+  <ul class="collapse">
+  <li><a href="#model-from-efa" id="toc-model-from-efa" class="nav-link" data-scroll-target="#model-from-efa">Model from EFA</a></li>
+  <li><a href="#task-structure-model" id="toc-task-structure-model" class="nav-link" data-scroll-target="#task-structure-model">Task Structure Model</a></li>
+  <li><a href="#input-material-model" id="toc-input-material-model" class="nav-link" data-scroll-target="#input-material-model">Input Material Model</a></li>
+  </ul></li>
   </ul>
 </nav>
 </nav>
@@ -397,6 +402,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </section>
 <section id="confirmatory-factor-analysis" class="level1">
 <h1>Confirmatory Factor Analysis</h1>
+<section id="model-from-efa" class="level2">
+<h2 class="anchored" data-anchor-id="model-from-efa">Model from EFA</h2>
+<p>Firstly, the model from EFA is tested.</p>
+<ul>
+<li>Spatial-object association test (宇宙黑洞) included</li>
+</ul>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -468,46 +479,236 @@ Standardized Root Mean Square Residual:
   SRMR                                           0.051</code></pre>
 </div>
 </div>
-<!-- ## No Associative Memory -->
+<ul>
+<li>Spatial-object association test (宇宙黑洞) excluded</li>
+</ul>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fitted2 &lt;- lavaan::cfa(</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   'Updating =~ `美术卡片` + `数字卡片` + `格子卡片` + `文字卡片` + `魔术师终极`</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   # AscMem =~ `人工语言-中级` + `欢乐餐厅` + 图片记忆</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   VerbalSTM =~ `幸运小球` + `密码箱` + `过目不忘PRO` + `顺背数PRO`</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   SpatialSTM =~ `宇宙黑洞` + `打靶场` + `蝴蝶照相机` + `位置记忆PRO`',</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   indices_memory, std.lv = TRUE, std.ov = TRUE</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co"># semPlot::semPaths(</span></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   fitted2, what = "std", edge.color = "black", rotation = 2,</span></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, </span></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0</span></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co"># lavaan::summary(fitted2, fit.measures = TRUE, estimates = FALSE)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>fitted2 <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">cfa</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">'Updating =~ `美术卡片` + `数字卡片` + `格子卡片` + `文字卡片`</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="st">  # AscMem =~ `人工语言-中级` + `欢乐餐厅` + 图片记忆</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="st">  VerbalSTM =~ `幸运小球` + `密码箱` + `顺背数PRO`</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="st">  SpatialSTM =~ `打靶场` + `蝴蝶照相机` + `位置记忆PRO`'</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  indices_memory, <span class="at">std.lv =</span> <span class="cn">TRUE</span>, <span class="at">std.ov =</span> <span class="cn">TRUE</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>semPlot<span class="sc">::</span><span class="fu">semPaths</span>(</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  fitted2, <span class="at">what =</span> <span class="st">"std"</span>, <span class="at">edge.color =</span> <span class="st">"black"</span>, <span class="at">rotation =</span> <span class="dv">2</span>,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">sizeMan =</span> <span class="dv">6</span>, <span class="at">sizeLat =</span> <span class="dv">8</span>, <span class="at">edge.label.cex =</span> <span class="fl">0.6</span>, </span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">nCharEdges =</span> <span class="dv">5</span>, <span class="at">esize =</span> <span class="dv">1</span>, <span class="at">trans =</span> <span class="dv">1</span>, <span class="at">nCharNodes =</span> <span class="dv">0</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="576"></p>
 </div>
-<!-- ## Input Material Model -->
-<!-- > Not fitted well. -->
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>lavaan<span class="sc">::</span><span class="fu">summary</span>(fitted2, <span class="at">fit.measures =</span> <span class="cn">TRUE</span>, <span class="at">estimates =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>lavaan 0.6-11 ended normally after 17 iterations
+
+  Estimator                                         ML
+  Optimization method                           NLMINB
+  Number of model parameters                        23
+                                                      
+                                                  Used       Total
+  Number of observations                           322         468
+                                                                  
+Model Test User Model:
+                                                      
+  Test statistic                                80.279
+  Degrees of freedom                                32
+  P-value (Chi-square)                           0.000
+
+Model Test Baseline Model:
+
+  Test statistic                               752.317
+  Degrees of freedom                                45
+  P-value                                        0.000
+
+User Model versus Baseline Model:
+
+  Comparative Fit Index (CFI)                    0.932
+  Tucker-Lewis Index (TLI)                       0.904
+
+Loglikelihood and Information Criteria:
+
+  Loglikelihood user model (H0)              -4227.955
+  Loglikelihood unrestricted model (H1)      -4187.816
+                                                      
+  Akaike (AIC)                                8501.910
+  Bayesian (BIC)                              8588.725
+  Sample-size adjusted Bayesian (BIC)         8515.772
+
+Root Mean Square Error of Approximation:
+
+  RMSEA                                          0.068
+  90 Percent confidence interval - lower         0.050
+  90 Percent confidence interval - upper         0.087
+  P-value RMSEA &lt;= 0.05                          0.051
+
+Standardized Root Mean Square Residual:
+
+  SRMR                                           0.047</code></pre>
+</div>
+</div>
+</section>
+<section id="task-structure-model" class="level2">
+<h2 class="anchored" data-anchor-id="task-structure-model">Task Structure Model</h2>
+<blockquote class="blockquote">
+<p>The covariance estimate for latent variables is not correct. The estimated correlation between “Simple” and “Complex” is <code>1.02</code>.</p>
+</blockquote>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fitted3 &lt;- lavaan::cfa(</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   'Verbal =~ 数字卡片 + 文字卡片 + 幸运小球 + 密码箱 + 过目不忘PRO + 顺背数PRO</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   Spatial =~ 格子卡片 + 打靶场 + 蝴蝶照相机 + 位置记忆PRO</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   Object =~ 美术卡片 + 宇宙黑洞 + 魔术师终极',</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   indices_memory, std.lv = TRUE, std.ov = TRUE</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># semPlot::semPaths(</span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   fitted3, what = "std", edge.color = "black", rotation = 2,</span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, </span></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0</span></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co"># lavaan::summary(fitted3, fit.measures = TRUE, estimates = FALSE)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>fitted3 <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">cfa</span>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">'Complex =~ `打靶场` + `蝴蝶照相机` + `幸运小球`</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="st">  Nback =~ `美术卡片` + `数字卡片` + `格子卡片` + `文字卡片`</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="st">  # AscMem =~ `人工语言-中级` + `欢乐餐厅` + 图片记忆</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="st">  Simple =~ `密码箱` + `顺背数PRO` + `位置记忆PRO`'</span>,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  indices_memory, <span class="at">std.lv =</span> <span class="cn">TRUE</span>, <span class="at">std.ov =</span> <span class="cn">TRUE</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>semPlot<span class="sc">::</span><span class="fu">semPaths</span>(</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  fitted3, <span class="at">what =</span> <span class="st">"std"</span>, <span class="at">edge.color =</span> <span class="st">"black"</span>, <span class="at">rotation =</span> <span class="dv">2</span>,</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">sizeMan =</span> <span class="dv">6</span>, <span class="at">sizeLat =</span> <span class="dv">8</span>, <span class="at">edge.label.cex =</span> <span class="fl">0.6</span>,</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">nCharEdges =</span> <span class="dv">5</span>, <span class="at">esize =</span> <span class="dv">1</span>, <span class="at">trans =</span> <span class="dv">1</span>, <span class="at">nCharNodes =</span> <span class="dv">0</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="576"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>lavaan<span class="sc">::</span><span class="fu">summary</span>(fitted3, <span class="at">fit.measures =</span> <span class="cn">TRUE</span>, <span class="at">estimates =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>lavaan 0.6-11 ended normally after 19 iterations
+
+  Estimator                                         ML
+  Optimization method                           NLMINB
+  Number of model parameters                        23
+                                                      
+                                                  Used       Total
+  Number of observations                           322         468
+                                                                  
+Model Test User Model:
+                                                      
+  Test statistic                               163.052
+  Degrees of freedom                                32
+  P-value (Chi-square)                           0.000
+
+Model Test Baseline Model:
+
+  Test statistic                               752.317
+  Degrees of freedom                                45
+  P-value                                        0.000
+
+User Model versus Baseline Model:
+
+  Comparative Fit Index (CFI)                    0.815
+  Tucker-Lewis Index (TLI)                       0.739
+
+Loglikelihood and Information Criteria:
+
+  Loglikelihood user model (H0)              -4269.341
+  Loglikelihood unrestricted model (H1)      -4187.816
+                                                      
+  Akaike (AIC)                                8584.683
+  Bayesian (BIC)                              8671.498
+  Sample-size adjusted Bayesian (BIC)         8598.545
+
+Root Mean Square Error of Approximation:
+
+  RMSEA                                          0.113
+  90 Percent confidence interval - lower         0.096
+  90 Percent confidence interval - upper         0.130
+  P-value RMSEA &lt;= 0.05                          0.000
+
+Standardized Root Mean Square Residual:
+
+  SRMR                                           0.076</code></pre>
+</div>
+</div>
+</section>
+<section id="input-material-model" class="level2">
+<h2 class="anchored" data-anchor-id="input-material-model">Input Material Model</h2>
+<blockquote class="blockquote">
+<p>Not fitted well.</p>
+</blockquote>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>fitted4 <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">cfa</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">'Verbal =~ 数字卡片 + 文字卡片 + 幸运小球 + 密码箱 + 顺背数PRO</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="st">  Spatial =~ 格子卡片 + 打靶场 + 蝴蝶照相机 + 位置记忆PRO</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="st">  Object =~ 美术卡片 + 宇宙黑洞'</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  indices_memory, <span class="at">std.lv =</span> <span class="cn">TRUE</span>, <span class="at">std.ov =</span> <span class="cn">TRUE</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>semPlot<span class="sc">::</span><span class="fu">semPaths</span>(</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  fitted4, <span class="at">what =</span> <span class="st">"std"</span>, <span class="at">edge.color =</span> <span class="st">"black"</span>, <span class="at">rotation =</span> <span class="dv">2</span>,</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">sizeMan =</span> <span class="dv">6</span>, <span class="at">sizeLat =</span> <span class="dv">8</span>, <span class="at">edge.label.cex =</span> <span class="fl">0.6</span>,</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">nCharEdges =</span> <span class="dv">5</span>, <span class="at">esize =</span> <span class="dv">1</span>, <span class="at">trans =</span> <span class="dv">1</span>, <span class="at">nCharNodes =</span> <span class="dv">0</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="576"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>lavaan<span class="sc">::</span><span class="fu">summary</span>(fitted4, <span class="at">fit.measures =</span> <span class="cn">TRUE</span>, <span class="at">estimates =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>lavaan 0.6-11 ended normally after 21 iterations
+
+  Estimator                                         ML
+  Optimization method                           NLMINB
+  Number of model parameters                        25
+                                                      
+                                                  Used       Total
+  Number of observations                           314         468
+                                                                  
+Model Test User Model:
+                                                      
+  Test statistic                               265.138
+  Degrees of freedom                                41
+  P-value (Chi-square)                           0.000
+
+Model Test Baseline Model:
+
+  Test statistic                               809.797
+  Degrees of freedom                                55
+  P-value                                        0.000
+
+User Model versus Baseline Model:
+
+  Comparative Fit Index (CFI)                    0.703
+  Tucker-Lewis Index (TLI)                       0.602
+
+Loglikelihood and Information Criteria:
+
+  Loglikelihood user model (H0)              -4623.176
+  Loglikelihood unrestricted model (H1)      -4490.606
+                                                      
+  Akaike (AIC)                                9296.351
+  Bayesian (BIC)                              9390.086
+  Sample-size adjusted Bayesian (BIC)         9310.793
+
+Root Mean Square Error of Approximation:
+
+  RMSEA                                          0.132
+  90 Percent confidence interval - lower         0.117
+  90 Percent confidence interval - upper         0.147
+  P-value RMSEA &lt;= 0.05                          0.000
+
+Standardized Root Mean Square Residual:
+
+  SRMR                                           0.098</code></pre>
+</div>
 </div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

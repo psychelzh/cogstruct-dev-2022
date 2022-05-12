@@ -17,14 +17,15 @@ execute:
 library(tidyverse)
 ```
 
+Here we check raw data from several special tasks. Especially check the factors influencing reliability, internal consistency of each task
+
 ## Forward Word Span (过目不忘)
 
 ```{r}
-#| label: fig-homophone
 #| fig-cap: Homophone Selection Proportion
 #| fig-width: 15
 #| fig-height: 5
-#| cache: TRUE
+#| cache: true
 
 targets::tar_load(data_valid_FWSPro, store = here::here("preproc/_targets"))
 chrs_freq <- read_tsv("CharFreq.txt", skip = 5)
@@ -116,3 +117,23 @@ rt_by_resp |>
   labs(x = "", y = "Response Time (s)", color = "Version") +
   theme_minimal()
 ```
+
+<!-- ## Reasoning (推理类题目) -->
+
+<!-- ```{r} -->
+<!-- targets::tar_load(data_valid_DRA, store = here::here("preproc/_targets")) -->
+<!-- data_valid_DRA |>  -->
+<!--   filter(course_name == "清华大学认知实验D") |>  -->
+<!--   unnest(raw_parsed) |>  -->
+<!--   mutate(item = as.numeric(as_factor(itemid))) |>  -->
+<!--   # group_by(item) |>  -->
+<!--   # filter(between(mean(acc == 1), 0.6, 0.9)) |> -->
+<!--   # ungroup() |>  -->
+<!--   filter(acc != -1) |>  -->
+<!--   pivot_wider( -->
+<!--     id_cols = user_id, -->
+<!--     names_from = item, -->
+<!--     values_from = acc -->
+<!--   ) |>  -->
+<!--   psycModel::reliability_summary(-user_id) -->
+<!-- ``` -->
