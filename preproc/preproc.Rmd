@@ -58,7 +58,7 @@ validate_raw_parsed <- function(data_parsed, games_req_kb) {
 clean_indices <- function(indices) {
   indices |>
     left_join(data.iquizoo::game_info, by = c("game_id", "game_name")) |>
-    group_by(user_id, game_name) |>
+    group_by(user_id, game_name, index_name) |>
     filter(
       if_else(
         str_detect(game_name_abbr, "[A|B]$"),
@@ -67,19 +67,6 @@ clean_indices <- function(indices) {
       )
     ) |>
     ungroup() |>
-    mutate(
-      indices_longer = map(
-        indices,
-        ~ pivot_longer(
-          .x,
-          cols = everything(),
-          names_to = "index_name",
-          values_to = "score"
-        )
-      ),
-      .keep = "unused"
-    ) |>
-    unnest(indices_longer) |>
     group_by(user_id, game_name_abbr, game_name, game_version, index_name) |>
     mutate(
       occasion = case_when(
@@ -101,7 +88,7 @@ clean_indices <- function(indices) {
 clean_indices_halves <- function(indices) {
   indices |>
     left_join(data.iquizoo::game_info, by = c("game_id", "game_name")) |>
-    group_by(user_id, game_name) |>
+    group_by(user_id, game_name, index_name) |>
     filter(
       if_else(
         str_detect(game_name_abbr, "[A|B]$"),
@@ -110,19 +97,6 @@ clean_indices_halves <- function(indices) {
       )
     ) |>
     ungroup() |>
-    mutate(
-      indices_longer = map(
-        indices,
-        ~ pivot_longer(
-          .x,
-          cols = everything(),
-          names_to = "index_name",
-          values_to = "score"
-        )
-      ),
-      .keep = "unused"
-    ) |>
-    unnest(indices_longer) |>
     group_by(user_id, game_name_abbr, game_name, game_version, index_name) |>
     mutate(
       occasion = recode_factor(
@@ -147,7 +121,7 @@ tar_option_set(
   format = "qs",
   imports = "preproc.iquizoo"
 )
-games <- tarflow.iquizoo::search_games_mem(config::get("where"))
+games <- tarflow.iquizoo::search_games_mem(config_where = config::get("where"))
 targets_data <- tarchetypes::tar_map(
   values = games,
   names = game_name_abbr,
@@ -240,14 +214,14 @@ list(
     only_thu,
     c("数字推理", "文字推理", "数字推理A", "数字推理B", "文字推理A", "文字推理B")
   ),
-  tar_target(
-    item_keys,
-    tarflow.iquizoo::pickup(
-      "SELECT *
-      FROM iquizoo_content_db.primarykey_question"
-    ) |>
-      mutate(NewId = bit64::as.character.integer64(NewId))
-  ),
+  # tar_target(
+  #   item_keys,
+  #   tarflow.iquizoo::pickup(
+  #     "SELECT *
+  #     FROM iquizoo_content_db.primarykey_question"
+  #   ) |>
+  #     mutate(NewId = bit64::as.character.integer64(NewId))
+  # ),
   tar_target(
     data_valid_final,
     data_valid |>
@@ -339,8 +313,8 @@ list(
           "prac", "test", ""
         )
       ) |>
-      left_join(item_keys, by = c("itemid" = "Id")) |>
-      mutate(itemid = coalesce(NewId, itemid)) |>
+      # left_join(item_keys, by = c("itemid" = "Id")) |>
+      # mutate(itemid = coalesce(NewId, itemid)) |>
       group_by(user_id, game_id) |>
       mutate(item = row_number(itemid)) |>
       ungroup() |>
