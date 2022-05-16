@@ -13,6 +13,7 @@ categories: [structure, wm]
 
 ```{r}
 #| label: setup
+#| include: false
 library(tidyverse)
 library(corrr)
 library(BayesFM)
@@ -34,12 +35,6 @@ pivot_wider_indices <- function(data) {
       names_from = game_index,
       values_from = test
     )
-}
-render_content <- function(file, ...) {
-  knitr::knit(
-    text = knitr::knit_expand(file, ...),
-    quiet = TRUE
-  )
 }
 ```
 
@@ -70,25 +65,30 @@ indices_memory <- indices_clean |>
     dimension %in% c("complex span", "working memory", "short term memory", "long term memory"),
     !game_name %in% c("言语记忆", "连续再认", "魔术师终极", "人工语言-中级", "图片记忆", "欢乐餐厅", "过目不忘PRO")
   )
-# add_count(user_id, game_name) |> 
-# mutate(
-#   game_index = if_else(
-#     n == 1, 
-#     game_name, 
-#     str_c(game_name, index_name, sep = "-")
-#   )
-# ) |> 
-# pivot_wider(
-#   id_cols = user_id,
-#   names_from = game_index,
-#   values_from = test
-# ) |> 
-# select(-user_id)
 ```
 
 The include tasks: 
 
 `r str_c(str_c("* ", unique(indices_memory$game_name)), collapse = "\n")`
+
+```{r}
+#| fig-width: 16
+#| fig-height: 16
+indices_selected <- indices_memory |> 
+  pivot_wider_indices() |>
+  select(-user_id)
+correlate(indices_selected, quiet = TRUE) |> 
+  rearrange(method = "HC") |>
+  stretch() |> 
+  mutate(across(c(x, y), as_factor)) |>
+  ggplot(aes(x, y)) +
+  geom_tile(aes(fill = r)) +
+  scico::scale_fill_scico(palette = "bam", midpoint = 0, direction = -1) +
+  coord_fixed() +
+  theme_minimal(base_size = 18) +
+  labs(x = "", y = "", fill = "Pearson's", color = "") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
 
 # Default Index selection
 
@@ -101,9 +101,7 @@ indices_selected <- indices_memory |>
   select(-user_id)
 ```
 
-```{r}
-#| child: !expr here::here("archetypes/child-fa-wm.Rmd~")
-```
+{{< include _child.qmd >}}
 
 # Mix N back indices
 
@@ -121,9 +119,7 @@ indices_selected <- indices_memory |>
   select(-user_id)
 ```
 
-```{r}
-#| child: !expr here::here("archetypes/child-fa-wm.Rmd~")
-```
+{{< include _child.qmd >}}
 
 # N back all `pc` index
 
@@ -136,6 +132,4 @@ indices_selected <- indices_memory |>
   select(-user_id)
 ```
 
-```{r}
-#| child: !expr here::here("archetypes/child-fa-wm.Rmd~")
-```
+{{< include _child.qmd >}}
