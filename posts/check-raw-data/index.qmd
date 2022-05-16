@@ -118,22 +118,97 @@ rt_by_resp |>
   theme_minimal()
 ```
 
-<!-- ## Reasoning (推理类题目) -->
+## Reasoning (推理类题目)
 
-<!-- ```{r} -->
-<!-- targets::tar_load(data_valid_DRA, store = here::here("preproc/_targets")) -->
-<!-- data_valid_DRA |>  -->
-<!--   filter(course_name == "清华大学认知实验D") |>  -->
-<!--   unnest(raw_parsed) |>  -->
-<!--   mutate(item = as.numeric(as_factor(itemid))) |>  -->
-<!--   # group_by(item) |>  -->
-<!--   # filter(between(mean(acc == 1), 0.6, 0.9)) |> -->
-<!--   # ungroup() |>  -->
-<!--   filter(acc != -1) |>  -->
-<!--   pivot_wider( -->
-<!--     id_cols = user_id, -->
-<!--     names_from = item, -->
-<!--     values_from = acc -->
-<!--   ) |>  -->
-<!--   psycModel::reliability_summary(-user_id) -->
-<!-- ``` -->
+```{r}
+#| eval: false
+targets::tar_load(data_valid_DRA, store = here::here("preproc/_targets"))
+data_valid_DRA |>
+  filter(course_name == "清华大学认知实验D") |>
+  unnest(raw_parsed) |>
+  mutate(item = as.numeric(as_factor(itemid))) |>
+  # group_by(item) |>
+  # filter(between(mean(acc == 1), 0.6, 0.9)) |>
+  # ungroup() |>
+  filter(acc != -1) |>
+  pivot_wider(
+    id_cols = user_id,
+    names_from = item,
+    values_from = acc
+  ) |>
+  select(-user_id)
+```
+
+## NeuroRacer (小狗回家)
+
+```{r}
+data_racer_new <- targets::tar_read(
+  data_valid_Racer, 
+  store = here::here("preproc/_targets")
+) |> 
+  tidyr::unnest(raw_parsed) |> 
+  dplyr::mutate(block = paste0("V", block)) |> 
+  dplyr::filter(block != "V0")
+data_racer_new |> 
+  dplyr::group_by(user_id, block) |> 
+  dplyr::summarise(
+    mean_score = sum(escortscore * trialdur) / sum(trialdur),
+    .groups = "drop"
+  ) |> 
+  tidyr::pivot_wider(
+    id_cols = user_id, 
+    names_from = block, 
+    values_from = mean_score
+  ) |> 
+  dplyr::select(-user_id) |> 
+  psych::alpha()
+data_racer_new |> 
+  dplyr::group_by(user_id, block) |> 
+  dplyr::group_modify(
+    ~ preproc.iquizoo::cpt(.x)
+  )|> 
+  dplyr::ungroup() |> 
+  tidyr::pivot_wider(
+    id_cols = user_id, 
+    names_from = block, 
+    values_from = dprime
+  ) |> 
+  dplyr::select(-user_id) |> 
+  psych::alpha()
+```
+
+```{r}
+data_racer_old <- targets::tar_read(
+  data_parsed_Racer, 
+  store = here::here("preproc/_targets")
+) |> 
+  dplyr::filter(game_version == "1.0.0") |> 
+  tidyr::unnest(raw_parsed) |> 
+  dplyr::mutate(block = paste0("V", block))
+data_racer_old |> 
+  dplyr::group_by(user_id, block) |> 
+  dplyr::summarise(
+    mean_score = sum(produr * trialdur) / sum(trialdur),
+    .groups = "drop"
+  ) |> 
+  tidyr::pivot_wider(
+    id_cols = user_id, 
+    names_from = block, 
+    values_from = mean_score
+  ) |> 
+  dplyr::select(-user_id) |> 
+  psych::alpha()
+data_racer_old |> 
+  dplyr::group_by(user_id, block) |> 
+  dplyr::group_modify(
+    ~ preproc.iquizoo::cpt(.x)
+  )|> 
+  dplyr::ungroup() |> 
+  tidyr::pivot_wider(
+    id_cols = user_id, 
+    names_from = block, 
+    values_from = dprime
+  ) |> 
+  dplyr::select(-user_id) |> 
+  psych::alpha()
+```
