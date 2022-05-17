@@ -1,4 +1,3 @@
-
 ## Correlation Matrix
 
 ```{r}
@@ -37,14 +36,14 @@ plot(mds)
 nfactors_test <- psych::nfactors(indices_selected)
 ```
 
-* Correlated latent factors
+-   Correlated latent factors
 
 ```{r}
 fit <- psych::fa(indices_selected, 3)
 psych::fa.diagram(fit)
 ```
 
-* Bifactor model
+-   Bifactor model
 
 ```{r}
 fit_bifac <- psych::omega(indices_selected, 3, plot = FALSE)
@@ -92,7 +91,7 @@ Firstly, the model from EFA is tested.
 
 #### Spatial-object association test (宇宙黑洞) included
 
-1. Correlated latent factor model:
+1.  Correlated latent factor model:
 
 ```{r}
 #| fig-height: 6
@@ -113,7 +112,7 @@ semPlot::semPaths(
 lavaan::summary(fitted1, fit.measures = TRUE, estimates = FALSE)
 ```
 
-2. Bifactor model:
+2.  Bifactor model:
 
 ```{r}
 #| fig-height: 6
@@ -138,7 +137,7 @@ lavaan::summary(fitted1, fit.measures = TRUE, estimates = FALSE)
 
 #### Spatial-object association test (宇宙黑洞) excluded
 
-1. Correlated latent factor model:
+1.  Correlated latent factor model:
 
 ```{r}
 #| fig-height: 6
@@ -159,7 +158,7 @@ semPlot::semPaths(
 lavaan::summary(fitted2, fit.measures = TRUE, estimates = FALSE)
 ```
 
-2. Bifactor model:
+2.  Bifactor model:
 
 ```{r}
 #| fig-height: 6
@@ -184,7 +183,7 @@ lavaan::summary(fitted2_bifac, fit.measures = TRUE, estimates = FALSE)
 
 ### Task Structure Model
 
-> The covariance estimate for latent variables is not correct. The estimated correlation between "Simple" and "Complex" is `1.02`.
+> The covariance estimate for latent variables is not correct. The estimated correlation between "Simple" and "Complex" is [larger than 1]{style="color: red"}.
 
 ```{r}
 #| fig-height: 6

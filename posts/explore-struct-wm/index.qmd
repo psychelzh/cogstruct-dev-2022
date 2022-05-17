@@ -67,7 +67,7 @@ indices_memory <- indices_clean |>
   )
 ```
 
-The include tasks: 
+The include tasks:
 
 `r str_c(str_c("* ", unique(indices_memory$game_name)), collapse = "\n")`
 
@@ -107,8 +107,8 @@ indices_selected <- indices_memory |>
 
 > All span tasks use `mean_span_pcu` index, but n-back tasks use mixed `dprime` and `pc` index.
 >
-> * 美术卡片、数字卡片：`dprime`
-> * 文字卡片、格子卡片：`pc`
+> -   美术卡片、数字卡片：`dprime`
+> -   文字卡片、格子卡片：`pc`
 
 ```{r}
 indices_selected <- indices_memory |> 
