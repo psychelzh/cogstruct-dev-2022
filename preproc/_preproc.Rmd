@@ -29,12 +29,15 @@ check_used_mouse <- function(raw_parsed) {
     str_split("-") |>
     map_lgl(~ any(.x == "mouse"))
 }
-check_version <- function(raw_parsed, game_name) {
+check_raw_data <- function(raw_parsed, game_name) {
   if (game_name == "各得其所") {
     return(has_name(raw_parsed, "minmove"))
   }
   if (game_name == "小狗回家") {
     return(has_name(raw_parsed, "escortscore"))
+  }
+  if (game_name == "我是大厨") {
+    return(any(str_detect(raw_parsed$status, "\\d")))
   }
   if (game_name %in% c("格子卡片", "美术卡片", "数字卡片", "文字卡片")) {
     return(any(raw_parsed$type == "lure"))
@@ -43,16 +46,36 @@ check_version <- function(raw_parsed, game_name) {
 }
 validate_raw_parsed <- function(data_parsed, games_req_kb) {
   data_parsed |>
-    mutate(
-      valid_device = map2_lgl(
+    filter(
+      # some games require keyboard input
+      map2_lgl(
         raw_parsed, game_name,
         ~ !(check_used_mouse(.x) & .y %in% games_req_kb)
       ),
-      valid_version = map2_lgl(
+      map2_lgl(
         raw_parsed, game_name,
-        check_version
+        check_raw_data
       ),
-      valid = valid_device & valid_version
+      case_when(
+        game_name == "瑞文高级推理" ~ TRUE,
+        # vital errors in the task programs for these days
+        str_detect(
+          game_name,
+          str_c(
+            c("图形推理", "图形折叠", "三维心理旋转测试"),
+            collapse = "|"
+          )
+        ) ~ game_time < "2022-04-28" | game_time > "2022-05-07",
+        # item not proper for these games for these days
+        str_detect(
+          game_name,
+          str_c(
+            c("文字推理", "数字推理"),
+            collapse = "|"
+          )
+        ) ~ game_time > "2022-06-01",
+        TRUE ~ game_version == max(game_version)
+      )
     )
 }
 clean_indices <- function(indices) {
@@ -130,7 +153,7 @@ targets_data <- tarchetypes::tar_map(
   tar_target(data_parsed, wrangle_data(data)),
   tar_target(
     data_valid,
-    semi_join(data_parsed, filter(raw_validation, valid))
+    validate_raw_parsed(data_parsed, games_req_kb)
   ),
   tar_target(
     indices,
@@ -158,8 +181,7 @@ targets_data <- tarchetypes::tar_map(
   tar_target(
     config_where_single_game,
     insert_where_single_game(config_where, game_id)
-  ),
-  tar_target(raw_validation, validate_raw_parsed(data_parsed, games_req_kb))
+  )
 )
 ```
 
@@ -206,55 +228,6 @@ list(
 
 ```{targets reliabilty, include=FALSE}
 list(
-  tar_target(
-    exclude_thu,
-    c("图形推理A", "三维心理旋转A", "图形折叠A")
-  ),
-  tar_target(
-    only_thu,
-    c("数字推理", "文字推理", "数字推理A", "数字推理B", "文字推理A", "文字推理B")
-  ),
-  # tar_target(
-  #   item_keys,
-  #   tarflow.iquizoo::pickup(
-  #     "SELECT *
-  #     FROM iquizoo_content_db.primarykey_question"
-  #   ) |>
-  #     mutate(NewId = bit64::as.character.integer64(NewId))
-  # ),
-  tar_target(
-    data_valid_final,
-    data_valid |>
-      group_by(game_name) |>
-      filter(game_version == max(game_version)) |>
-      ungroup()
-  ),
-  tar_target(
-    indices_final,
-    indices_clean |>
-      left_join(users, by = "user_id") |>
-      filter(
-        !(game_name %in% exclude_thu & school == "清华大学认知实验") |
-          (game_name %in% only_thu & school == "清华大学认知实验")
-      ) |>
-      group_by(game_name) |>
-      filter(game_version == max(game_version)) |>
-      ungroup()
-  ),
-  tar_target(
-    indices_even_final,
-    indices_clean_even |>
-      group_by(game_name) |>
-      filter(game_version == max(game_version)) |>
-      ungroup()
-  ),
-  tar_target(
-    indices_odd_final,
-    indices_clean_odd |>
-      group_by(game_name) |>
-      filter(game_version == max(game_version)) |>
-      ungroup()
-  ),
   tarchetypes::tar_file_read(
     config_ic,
     here::here("config/internal-consistency.csv"),
@@ -263,8 +236,8 @@ list(
   tar_target(
     reliability_split_half,
     bind_rows(
-      odd = indices_odd_final,
-      even = indices_even_final,
+      odd = indices_clean_odd,
+      even = indices_clean_even,
       .id = "halves"
     ) |>
       semi_join(filter(config_ic, method == "prophecy"), by = "game_name") |>
@@ -292,14 +265,8 @@ list(
   ),
   tar_target(
     reliability_alpha,
-    data_valid_final |>
+    data_valid |>
       semi_join(filter(config_ic, method == "alpha"), by = "game_name") |>
-      # BNU source data were incorrect for these games
-      left_join(users, by = "user_id") |>
-      filter(
-        !(game_name %in% exclude_thu & school == "清华大学认知实验") |
-          (game_name %in% only_thu & school == "清华大学认知实验")
-      ) |>
       # data from the last time of each test is deemed the right one
       left_join(data.iquizoo::game_info, by = c("game_id", "game_name")) |>
       group_by(user_id, game_name, game_version) |>
@@ -345,7 +312,7 @@ list(
   ),
   tar_target(
     reliability_test_retest,
-    indices_final |>
+    indices_clean |>
       filter(if_all(contains("test"), is.finite)) |>
       group_by(game_name, index_name) |>
       mutate(
@@ -356,48 +323,46 @@ list(
       ungroup() |>
       group_by(game_name, game_name_abbr, game_version, index_name) |>
       group_modify(
-        ~ tibble(
-          n_test_retest = nrow(.x),
-          n_no_outlier = .x |>
-            filter(!Outlier) |>
-            nrow(),
-          icc = .x |>
-            select(contains("test")) |>
-            psych::ICC() |>
-            pluck("results", "ICC", 2),
-          icc_no_outlier = .x |>
-            filter(!Outlier) |>
-            select(contains("test")) |>
-            psych::ICC() |>
-            pluck("results", "ICC", 2),
-          r_test_retest = cor(.x$test, .x$retest),
-          r_test_retest_no_outlier = with(
-            subset(.x, !Outlier),
-            cor(test, retest)
+        possibly(
+          ~ tibble(
+            n_test_retest = nrow(.x),
+            n_no_outlier = .x |>
+              filter(!Outlier) |>
+              nrow(),
+            icc = .x |>
+              select(contains("test")) |>
+              psych::ICC() |>
+              pluck("results", "ICC", 2),
+            icc_no_outlier = .x |>
+              filter(!Outlier) |>
+              select(contains("test")) |>
+              psych::ICC() |>
+              pluck("results", "ICC", 2),
+            r_test_retest = cor(.x$test, .x$retest),
+            r_test_retest_no_outlier = with(
+              subset(.x, !Outlier),
+              cor(test, retest)
+            ),
+            avg_test = mean(.x$test[!.x$Outlier], na.rm = TRUE),
+            avg_retest = mean(.x$retest[!.x$Outlier], na.rm = TRUE),
+            retest_change = .x |>
+              filter(!Outlier) |>
+              summarise(t.test(retest, test, paired = TRUE) |> broom::tidy()) |>
+              rstatix::p_format() |>
+              rstatix::p_mark_significant() |>
+              mutate(
+                summary_msg = str_glue("{round(estimate, 3)}({p.value})")
+              ) |>
+              pull(summary_msg)
           ),
-          avg_test = mean(.x$test[!.x$Outlier], na.rm = TRUE),
-          avg_retest = mean(.x$retest[!.x$Outlier], na.rm = TRUE),
-          retest_change = .x |>
-            filter(!Outlier) |>
-            summarise(t.test(retest, test, paired = TRUE) |> broom::tidy()) |>
-            rstatix::p_format() |>
-            rstatix::p_mark_significant() |>
-            mutate(
-              summary_msg = str_glue("{round(estimate, 3)}({p.value})")
-            ) |>
-            pull(summary_msg)
+          tibble()
         )
       ) |>
       ungroup()
   ),
   tar_target(
     reliability_test_retest_odd,
-    indices_odd_final |>
-      left_join(users, by = "user_id") |>
-      filter(
-        !(game_name %in% exclude_thu & school == "清华大学认知实验") |
-          (game_name %in% only_thu & school == "清华大学认知实验")
-      ) |>
+    indices_clean_odd |>
       filter(if_all(contains("test"), is.finite)) |>
       group_by(game_name, game_name_abbr, game_version, index_name) |>
       mutate(
@@ -406,16 +371,19 @@ list(
           as_tibble()
       ) |>
       group_modify(
-        ~ tibble(
-          icc_odd_half = .x |>
-            filter(!Outlier) |>
-            select(contains("test")) |>
-            psych::ICC() |>
-            pluck("results", "ICC", 2),
-          r_odd_half = with(
-            subset(.x, !Outlier),
-            cor(test, retest)
-          )
+        possibly(
+          ~ tibble(
+            icc_odd_half = .x |>
+              filter(!Outlier) |>
+              select(contains("test")) |>
+              psych::ICC() |>
+              pluck("results", "ICC", 2),
+            r_odd_half = with(
+              subset(.x, !Outlier),
+              cor(test, retest)
+            )
+          ),
+          tibble()
         )
       ) |>
       ungroup()
