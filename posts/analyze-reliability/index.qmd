@@ -1,0 +1,50 @@
+---
+title: "Analyze Reliability"
+author: "Liang Zhang"
+editor: visual
+draft: true
+execute: 
+  warning: false
+format: 
+  html:
+    code-fold: true
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+```
+
+# Trial Length on Reliability
+
+First
+
+```{r}
+targets::tar_load(rel_var_len)
+rel_var_len |> 
+  group_by(game_name, game_name_abbr, prop, index_name) |> 
+  summarise(icc_avg = mean(icc), .groups = "drop") |> 
+  ggplot(aes(prop, icc_avg)) +
+  stat_summary()
+
+
+rel_var_len |> 
+  filter(
+    game_name == "卡片分类PRO", 
+    str_detect(index_name, "switch_cost")
+  ) |> 
+  group_by(game_name, game_name_abbr, prop, index_name) |> 
+  summarise(mean_se(icc), .groups = "drop") |> 
+  # unite("game_index", game_name_abbr, index_name) |> 
+  ggplot(aes(prop, y, color = index_name)) +
+  geom_line() +
+  geom_point() +
+  geom_errorbar(
+    aes(ymax = ymax, ymin = ymin),
+    width = 0
+  )
+geom_line(aes(group = game_index), position = position_dodge(width = 0.1))
+facet_wrap(~ game_name)
+```

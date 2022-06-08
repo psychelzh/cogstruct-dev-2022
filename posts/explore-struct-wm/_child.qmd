@@ -23,8 +23,6 @@ mds <- indices_selected |>
   cor(use = "pairwise") |> 
   smacof::sim2diss(to.dist = TRUE) |> 
   smacof::mds(ndim = 2, type = "mspline")
-# plot(mds, plot.type = "Shepard", main = "Shepard Diagram (Ratio Transformation)")
-# par(family = "SimHei")
 plot(mds)
 ```
 
@@ -53,8 +51,6 @@ psych::omega.diagram(fit_bifac)
 ### Bayesian Factor Analysis
 
 ```{r}
-#| cache: true
-#| dependson: "load-data"
 mcmc <- indices_selected |> 
   mutate(across(.fns = ~ scale(.)[, 1])) |> 
   befa(verbose = FALSE) |> 
@@ -94,7 +90,7 @@ Firstly, the model from EFA is tested.
 1.  Correlated latent factor model:
 
 ```{r}
-#| fig-height: 6
+#| fig-height: 4
 #| fig-width: 10
 fitted1 <- lavaan::cfa(
   'Updating =~ `美术卡片` + `数字卡片` + `格子卡片` + `文字卡片`
@@ -102,14 +98,55 @@ fitted1 <- lavaan::cfa(
   VerbalSTM =~ `幸运小球` + `密码箱` + `顺背数PRO`
   SpatialSTM =~ `宇宙黑洞` + `打靶场` + `蝴蝶照相机` + `位置记忆PRO`',
   indices_selected, std.lv = TRUE, std.ov = TRUE,
-  estimator = "WLSM"
+  estimator = "MLR", missing = "ml"
 )
 semPlot::semPaths(
   fitted1, what = "std", edge.color = "black", layout = "tree2",
-  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, 
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, intercepts = FALSE,
   nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0
 )
 lavaan::summary(fitted1, fit.measures = TRUE, estimates = FALSE)
+```
+
+```{r}
+#| fig-height: 4
+#| fig-width: 10
+fitted1_alt <- lavaan::cfa(
+  'Updating1 =~ `美术卡片` + `数字卡片`
+  Updating2 =~ `格子卡片` + `文字卡片`
+  # AscMem =~ `人工语言-中级` + `欢乐餐厅` + 图片记忆
+  VerbalSTM =~ `幸运小球` + `密码箱` + `顺背数PRO`
+  SpatialSTM =~ `宇宙黑洞` + `打靶场` + `蝴蝶照相机` + `位置记忆PRO`',
+  indices_selected, std.lv = TRUE, std.ov = TRUE,
+  estimator = "MLR", missing = "ml"
+)
+semPlot::semPaths(
+  fitted1_alt, what = "std", edge.color = "black", layout = "tree2",
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, intercepts = FALSE,
+  nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0
+)
+lavaan::summary(fitted1_alt, fit.measures = TRUE, estimates = FALSE)
+```
+
+```{r}
+#| fig-height: 6
+#| fig-width: 10
+fitted1_alt2 <- lavaan::cfa(
+  'Updating =~ Updating1 + Updating2
+  Updating1 =~ `美术卡片` + `数字卡片`
+  Updating2 =~ `格子卡片` + `文字卡片`
+  # AscMem =~ `人工语言-中级` + `欢乐餐厅` + 图片记忆
+  VerbalSTM =~ `幸运小球` + `密码箱` + `顺背数PRO`
+  SpatialSTM =~ `宇宙黑洞` + `打靶场` + `蝴蝶照相机` + `位置记忆PRO`',
+  indices_selected, std.lv = TRUE, std.ov = TRUE,
+  estimator = "MLR", missing = "ml"
+)
+semPlot::semPaths(
+  fitted1_alt2, what = "std", edge.color = "black",
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, intercepts = FALSE,
+  nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0
+)
+lavaan::summary(fitted1_alt2, fit.measures = TRUE, estimates = FALSE)
 ```
 
 2.  Bifactor model:
@@ -124,15 +161,37 @@ fitted1_bifac <- lavaan::cfa(
   VerbalSTM =~ `幸运小球` + `密码箱` + `顺背数PRO`
   SpatialSTM =~ `宇宙黑洞` + `打靶场` + `蝴蝶照相机` + `位置记忆PRO`',
   indices_selected, std.lv = TRUE, std.ov = TRUE, orthogonal = TRUE, 
-  estimator = "WLSM"
+  estimator = "MLR", missing = "ml"
 )
 semPlot::semPaths(
   fitted1_bifac, what = "std", edge.color = "black", layout = "tree2",
-  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, 
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, intercepts = FALSE,
   nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0,
   bifactor = "Common"
 )
-lavaan::summary(fitted1, fit.measures = TRUE, estimates = FALSE)
+lavaan::summary(fitted1_bifac, fit.measures = TRUE, estimates = FALSE)
+```
+
+3.  Hierarchical model:
+
+```{r}
+#| fig-height: 6
+#| fig-width: 10
+fitted1_higher <- lavaan::cfa(
+  'Common =~ Updating + VerbalSTM + SpatialSTM
+  Updating =~ `美术卡片` + `数字卡片` + `格子卡片` + `文字卡片`
+  VerbalSTM =~ `幸运小球` + `密码箱` + `顺背数PRO`
+  SpatialSTM =~ `宇宙黑洞` + `打靶场` + `蝴蝶照相机` + `位置记忆PRO`',
+  indices_selected, std.lv = TRUE, std.ov = TRUE,
+  estimator = "MLR", missing = "ml"
+)
+semPlot::semPaths(
+  fitted1_higher, what = "std", edge.color = "black", layout = "tree2",
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, intercepts = FALSE,
+  nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0,
+  bifactor = "Common"
+)
+lavaan::summary(fitted1_higher, fit.measures = TRUE, estimates = FALSE)
 ```
 
 #### Spatial-object association test (宇宙黑洞) excluded
@@ -140,7 +199,7 @@ lavaan::summary(fitted1, fit.measures = TRUE, estimates = FALSE)
 1.  Correlated latent factor model:
 
 ```{r}
-#| fig-height: 6
+#| fig-height: 4
 #| fig-width: 10
 fitted2 <- lavaan::cfa(
   'Updating =~ `美术卡片` + `数字卡片` + `格子卡片` + `文字卡片`
@@ -148,14 +207,55 @@ fitted2 <- lavaan::cfa(
   VerbalSTM =~ `幸运小球` + `密码箱` + `顺背数PRO`
   SpatialSTM =~ `打靶场` + `蝴蝶照相机` + `位置记忆PRO`',
   indices_selected, std.lv = TRUE, std.ov = TRUE,
-  estimator = "WLSM"
+  estimator = "MLR", missing = "ml"
 )
 semPlot::semPaths(
   fitted2, what = "std", edge.color = "black", layout = "tree2",
-  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, 
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, intercepts = FALSE,
   nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0
 )
 lavaan::summary(fitted2, fit.measures = TRUE, estimates = FALSE)
+```
+
+```{r}
+#| fig-height: 4
+#| fig-width: 10
+fitted2_alt <- lavaan::cfa(
+  'Updating1 =~ `美术卡片` + `数字卡片`
+  Updating2 =~ `格子卡片` + `文字卡片`
+  # AscMem =~ `人工语言-中级` + `欢乐餐厅` + 图片记忆
+  VerbalSTM =~ `幸运小球` + `密码箱` + `顺背数PRO`
+  SpatialSTM =~ `打靶场` + `蝴蝶照相机` + `位置记忆PRO`',
+  indices_selected, std.lv = TRUE, std.ov = TRUE,
+  estimator = "MLR", missing = "ml"
+)
+semPlot::semPaths(
+  fitted1_alt, what = "std", edge.color = "black", layout = "tree2",
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, intercepts = FALSE,
+  nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0
+)
+lavaan::summary(fitted1_alt, fit.measures = TRUE, estimates = FALSE)
+```
+
+```{r}
+#| fig-height: 6
+#| fig-width: 10
+fitted2_alt2 <- lavaan::cfa(
+  'Updating =~ Updating1 + Updating2
+  Updating1 =~ `美术卡片` + `数字卡片`
+  Updating2 =~ `格子卡片` + `文字卡片`
+  # AscMem =~ `人工语言-中级` + `欢乐餐厅` + 图片记忆
+  VerbalSTM =~ `幸运小球` + `密码箱` + `顺背数PRO`
+  SpatialSTM =~ `打靶场` + `蝴蝶照相机` + `位置记忆PRO`',
+  indices_selected, std.lv = TRUE, std.ov = TRUE,
+  estimator = "MLR", missing = "ml"
+)
+semPlot::semPaths(
+  fitted2_alt2, what = "std", edge.color = "black",
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, intercepts = FALSE,
+  nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0
+)
+lavaan::summary(fitted2_alt2, fit.measures = TRUE, estimates = FALSE)
 ```
 
 2.  Bifactor model:
@@ -170,15 +270,37 @@ fitted2_bifac <- lavaan::cfa(
   VerbalSTM =~ `幸运小球` + `密码箱` + `顺背数PRO`
   SpatialSTM =~ `打靶场` + `蝴蝶照相机` + `位置记忆PRO`',
   indices_selected, std.lv = TRUE, std.ov = TRUE, orthogonal = TRUE, 
-  estimator = "WLSM"
+  estimator = "MLR", missing = "ml"
 )
 semPlot::semPaths(
   fitted2_bifac, what = "std", edge.color = "black", layout = "tree2",
-  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, 
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, intercepts = FALSE,
   nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0,
   bifactor = "Common"
 )
 lavaan::summary(fitted2_bifac, fit.measures = TRUE, estimates = FALSE)
+```
+
+3.  Hierarchical Model:
+
+```{r}
+#| fig-height: 6
+#| fig-width: 10
+fitted2_higher <- lavaan::cfa(
+  'Common =~ Updating + VerbalSTM + SpatialSTM
+  Updating =~ `美术卡片` + `数字卡片` + `格子卡片` + `文字卡片`
+  VerbalSTM =~ `幸运小球` + `密码箱` + `顺背数PRO`
+  SpatialSTM =~ `打靶场` + `蝴蝶照相机` + `位置记忆PRO`',
+  indices_selected, std.lv = TRUE, std.ov = TRUE,
+  estimator = "MLR", missing = "ml"
+)
+semPlot::semPaths(
+  fitted2_higher, what = "std", edge.color = "black", layout = "tree2",
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, intercepts = FALSE,
+  nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0,
+  bifactor = "Common"
+)
+lavaan::summary(fitted2_higher, fit.measures = TRUE, estimates = FALSE)
 ```
 
 ### Task Structure Model
@@ -186,7 +308,7 @@ lavaan::summary(fitted2_bifac, fit.measures = TRUE, estimates = FALSE)
 > The covariance estimate for latent variables is not correct. The estimated correlation between "Simple" and "Complex" is [larger than 1]{style="color: red"}.
 
 ```{r}
-#| fig-height: 6
+#| fig-height: 4
 #| fig-width: 10
 fitted3 <- lavaan::cfa(
   'Complex =~ `打靶场` + `蝴蝶照相机` + `幸运小球`
@@ -194,11 +316,11 @@ fitted3 <- lavaan::cfa(
   # AscMem =~ `人工语言-中级` + `欢乐餐厅` + 图片记忆
   Simple =~ `密码箱` + `顺背数PRO` + `位置记忆PRO`',
   indices_selected, std.lv = TRUE, std.ov = TRUE, 
-  estimator = "WLSM"
+  estimator = "MLR", missing = "ml"
 )
 semPlot::semPaths(
   fitted3, what = "std", edge.color = "black", layout = "tree2",
-  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6,
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, intercepts = FALSE,
   nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0
 )
 lavaan::summary(fitted3, fit.measures = TRUE, estimates = FALSE)
@@ -209,18 +331,18 @@ lavaan::summary(fitted3, fit.measures = TRUE, estimates = FALSE)
 > Not fitted well.
 
 ```{r}
-#| fig-height: 6
+#| fig-height: 4
 #| fig-width: 10
 fitted4 <- lavaan::cfa(
   'Verbal =~ 数字卡片 + 文字卡片 + 幸运小球 + 密码箱 + 顺背数PRO
   Spatial =~ 格子卡片 + 打靶场 + 蝴蝶照相机 + 位置记忆PRO
   Object =~ 美术卡片 + 宇宙黑洞',
   indices_selected, std.lv = TRUE, std.ov = TRUE,
-  estimator = "WLSM"
+  estimator = "MLR", missing = "ml"
 )
 semPlot::semPaths(
   fitted4, what = "std", edge.color = "black", layout = "tree2",
-  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6,
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, intercepts = FALSE,
   nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0
 )
 lavaan::summary(fitted4, fit.measures = TRUE, estimates = FALSE)

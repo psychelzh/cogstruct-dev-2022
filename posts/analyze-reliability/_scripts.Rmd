@@ -1,0 +1,161 @@
+---
+title: "Prepare data for reliability"
+---
+
+```{r setup, include=FALSE}
+library(targets)
+knitr::opts_chunk$set(tar_interactive = FALSE)
+```
+
+```{targets utils, tar_globals=TRUE}
+preproc_data_var_len <- function(data_valid, props, seed, reps, ...) {
+  withr::local_seed(seed)
+  expand_grid(
+    data_valid,
+    prop = props,
+    n = reps
+  ) |> 
+    uncount(n, .id = "rep") |> 
+    mutate(
+      raw_parsed = map2(
+        raw_parsed, prop,
+        ~ slice_sample(.x, prop = .y)
+      )
+    ) |> 
+    preproc_data(...)
+}
+clean_indices <- function(indices_var_len, game_name_abbr) {
+  indices <- if (str_detect(game_name_abbr, "[A|B]$")) {
+    occasion <- ifelse(
+      str_detect(game_name_abbr, "A$"), 
+      "test", 
+      "retest"
+    )
+    indices_var_len |> 
+      filter.(
+        row_number.(desc.(game_time)) == 1,
+        .by = c(user_id, index_name, prop, rep)
+      ) |> 
+      mutate.(occasion = occasion)
+  } else {
+    indices_var_len |> 
+      filter.(
+        row_number.(desc.(game_time)) <= 2,
+        .by = c(user_id, index_name, prop, rep)
+      ) |> 
+      mutate.(
+        occasion = ifelse.(
+          row_number.(game_time) == 1,
+          "test", "retest"
+        ),
+        .by = c(user_id, game_version, index_name, prop, rep)
+      )
+  } 
+  select.(indices, -course_name, -game_time, -game_duration)
+}
+```
+
+```{targets set-targets, tar_globals=TRUE}
+future::plan(future.callr::callr)
+tar_option_set(
+  package = c(
+    "tidyverse", 
+    "preproc.iquizoo", 
+    "tarflow.iquizoo",
+    "tidytable"
+  ),
+  format = "qs",
+  imports = "preproc.iquizoo"
+)
+game_config <- readxl::read_excel("game_config.xlsx") |> 
+  dplyr::filter(check_length) |> 
+  dplyr::left_join(data.iquizoo::game_info, by = c("game_name", "game_name_abbr")) |> 
+  dplyr::mutate(
+    prep_fun = rlang::syms(prep_fun_name),
+    dplyr::across(c(input, extra), rlang::parse_exprs)
+  )
+targets <- tarchetypes::tar_map(
+  values = game_config,
+  names = game_name_abbr,
+  tar_target(
+    data_valid,
+    tar_read_raw(
+      paste("data_valid", game_name_abbr, sep = "_"), 
+      store = here::here("preproc/_targets")
+    )
+  ),
+  tar_target(),
+  tar_target(
+    indices_var_len,
+    preproc_data_var_len(
+      data_valid,
+      props = seq(0.5, 0.9, by = 0.1),
+      seed = 1,
+      reps = 100,
+      fn = prep_fun,
+      .input = input,
+      .extra = extra
+    )
+  ),
+  tar_target(
+    indices_clean_var_len,
+    clean_indices(indices_var_len, game_name_abbr)
+  )
+)
+```
+
+```{targets main-targets}
+list(
+  targets,
+  tarchetypes::tar_combine(
+    indices_clean_var_len,
+    targets[[3]]
+  ),
+  tar_target(
+    indices_wider_var_len,
+    indices_clean_var_len |> 
+      left_join.(
+        data.iquizoo::game_info, 
+        by = c("game_id", "game_name")
+      ) |>
+      mutate.(
+        across.(
+          starts_with("game_name"), 
+          ~ str_remove(., "[A|B]$")
+        )
+      ) |> 
+      pivot_wider.(
+        id_cols = c(
+          user_id, game_name, game_name_abbr, game_version, 
+          prop, rep, index_name
+        ),
+        names_from = occasion,
+        values_from = score
+      )
+  ),
+  tar_target(
+    rel_var_len,
+    indices_wider_var_len |> 
+      drop_na.() |> 
+      filter.(
+        game_version == max(game_version),
+        .by = c(game_name, game_name_abbr)
+      ) |> 
+      summarise.(
+        n = n.(),
+        r = cor(test, retest),
+        icc = tryCatch(
+          data.frame(test, retest) |> 
+            psych::ICC() |> 
+            purrr::pluck("results", "ICC", 2)
+          error = function(e) NA_real_
+        ),
+        .by = c(game_name, game_name_abbr, prop, rep, index_name)
+      )
+  )
+)
+```
+
+```{r run-pipeline}
+tar_make()
+```
