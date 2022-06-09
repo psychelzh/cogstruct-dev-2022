@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/prepare-training/index.html",
       "/posts/Large-scale meta analysis/index.html",
       "/posts/explore-struct-wm/index.html",
       "/posts/check-raw-data/index.html"

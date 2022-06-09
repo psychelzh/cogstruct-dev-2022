@@ -2,5 +2,203 @@
 title: "Prepare Tasks for Cognitive Training Project"
 author: "Liang Zhang"
 date: "2022-06-08"
-draft: true
+draft: false
+format: 
+  html:
+    code-fold: true
+execute: 
+  warning: false
 ---
+
+```{r}
+library(tidyverse)
+library(corrr)
+library(formattable)
+requireNamespace("bit64")
+```
+
+```{r}
+pivot_wider_indices <- function(data) {
+  data |>
+    add_count(user_id, game_name) |>
+    mutate(
+      game_index = if_else(
+        n == 1,
+        game_name,
+        str_c(game_name, index_name, sep = "-")
+      )
+    ) |>
+    pivot_wider(
+      id_cols = user_id,
+      names_from = game_index,
+      values_from = test
+    )
+}
+format_dt <- function(x) {
+  x |> 
+    mutate(across(c(r, abs_r, icc), ~ digits(., 2))) |> 
+    formattable(
+      list(
+        abs_r = formatter(
+          "span",
+          style = ~ style(
+            color =
+              case_when(
+                abs_r > quantile(abs_r, 0.75) ~ "red",
+                abs_r > quantile(abs_r, 0.25) ~ "blue",
+                TRUE ~ "green"
+              )
+          )
+        ),
+        icc = color_tile("transparent", "pink")
+      )
+    ) |> 
+    as.datatable(rownames = FALSE)
+}
+```
+
+```{r}
+targets::tar_load(
+  reliability_test_retest, 
+  store = here::here("preproc/_targets")
+)
+ind_filt <- readxl::read_excel(here::here("config/indices_filtering.xlsx"))
+indices_clean <- targets::tar_read(
+  indices_clean, 
+  store = here::here("preproc/_targets")
+) |>
+  semi_join(
+    filter(ind_filt, check_result %in% c("target", "target-low")) |> 
+      add_row(game_name = "瑞文高级推理", index_name = "nc_test"),
+    by = c("game_name", "index_name")
+  )
+```
+
+# Correlation with Reasoning tasks
+
+## RAPM 
+
+```{r}
+indices_clean |> 
+  filter(game_name_abbr != "RAPM") |> 
+  inner_join(
+    indices_clean |> 
+      filter(
+        game_name_abbr == "RAPM", 
+        index_name == "nc_test"
+      ) |> 
+      select(user_id, rapm = test),
+    by = "user_id"
+  ) |> 
+  group_by(game_name, index_name) |> 
+  summarise(
+    n = sum(!is.na(test) & !is.na(rapm)),
+    r = cor(test, rapm, use = "complete"),
+    .groups = "drop"
+  ) |> 
+  mutate(abs_r = abs(r)) |> 
+  arrange(desc(abs_r)) |> 
+  left_join(
+    reliability_test_retest |> 
+      select(game_name, index_name, icc = icc_no_outlier),
+    by = c("game_name", "index_name")
+  ) |> 
+  format_dt()
+```
+
+## Nonverbal Reasoning
+
+```{r}
+indices_clean |> 
+  filter(game_name_abbr != "NVR") |> 
+  inner_join(
+    indices_clean |> 
+      filter(game_name_abbr == "NVR") |> 
+      select(user_id, nvr = test),
+    by = "user_id"
+  ) |> 
+  group_by(game_name, index_name) |> 
+  summarise(
+    n = sum(!is.na(test) & !is.na(nvr)),
+    r = cor(test, nvr, use = "complete"),
+    .groups = "drop"
+  ) |> 
+  filter(n > 100) |> 
+  mutate(abs_r = abs(r)) |> 
+  arrange(desc(abs_r)) |> 
+  left_join(
+    reliability_test_retest |> 
+      select(game_name, index_name, icc = icc_no_outlier),
+    by = c("game_name", "index_name")
+  ) |> 
+  format_dt()
+```
+
+# Correlation with Visual-Spatial Working Memory Tasks
+
+```{r}
+#| label: calc-latent-score
+indices_viswm <- indices_clean |> 
+  semi_join(
+    ind_filt |> 
+      filter(
+        dimension %in% c("complex span", "working memory", "short term memory"),
+        check_result == "target"
+      ),
+    by = c("game_name", "index_name")
+  ) |> 
+  pivot_wider_indices()
+```
+
+## The Latent Factor Model (heirachical model)
+
+```{r}
+fitted <- lavaan::cfa(
+  'Common =~ Updating + VerbalSTM + SpatialSTM
+  Updating =~ `美术卡片` + `数字卡片` + `格子卡片` + `文字卡片`
+  VerbalSTM =~ `幸运小球` + `密码箱` + `顺背数PRO`
+  SpatialSTM =~ `宇宙黑洞` + `打靶场` + `蝴蝶照相机` + `位置记忆PRO`',
+  indices_viswm, std.lv = TRUE, std.ov = TRUE,
+  estimator = "MLR", missing = "ml"
+)
+semPlot::semPaths(
+  fitted, what = "std", edge.color = "black", layout = "tree2",
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, intercepts = FALSE,
+  nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0,
+  bifactor = "Common"
+)
+lavaan::summary(fitted, fit.measures = TRUE, estimates = FALSE)
+```
+
+
+## Common Factor
+
+```{r}
+scores_latent <- bind_cols(
+  select(indices_viswm, user_id),
+  lavaan::predict(fitted) |> 
+    unclass() |> 
+    as_tibble()
+)
+indices_clean |> 
+  inner_join(
+    scores_latent,
+    by = "user_id"
+  ) |> 
+  group_by(game_name, index_name) |> 
+  summarise(
+    n = sum(!is.na(test) & !is.na(Common)),
+    r = cor(test, Common, use = "complete"),
+    .groups = "drop"
+  ) |> 
+  mutate(abs_r = abs(r)) |> 
+  arrange(desc(abs_r)) |> 
+  left_join(
+    reliability_test_retest |> 
+      select(game_name, index_name, icc = icc_no_outlier),
+    by = c("game_name", "index_name")
+  ) |> 
+  format_dt()
+```
+
+

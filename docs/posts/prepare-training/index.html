@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-0.9.411">
+<meta name="generator" content="quarto-0.9.556">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -17,21 +17,85 @@ span.underline{text-decoration: underline;}
 div.column{display: inline-block; vertical-align: top; width: 50%;}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
+
 
 <script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../../site_libs/clipboard/clipboard.min.js"></script>
-<meta name="quarto:offset" content="../../">
 <script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="../../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
 <script src="../../site_libs/quarto-html/quarto.js"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link id="quarto-text-highlighting-styles" href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet">
@@ -54,6 +118,16 @@ ul.task-list{list-style: none;}
     "search-submit-button-title": "Submit"
   }
 }</script>
+
+<script src="../../site_libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+<link href="../../site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet">
+<script src="../../site_libs/datatables-binding-0.23/datatables.js"></script>
+<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="../../site_libs/dt-core-1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="../../site_libs/dt-core-1.11.3/css/jquery.dataTables.extra.css" rel="stylesheet">
+<script src="../../site_libs/dt-core-1.11.3/js/jquery.dataTables.min.js"></script>
+<link href="../../site_libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet">
+<script src="../../site_libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -92,13 +166,10 @@ ul.task-list{list-style: none;}
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
       <h1 class="title">Prepare Tasks for Cognitive Training Project</h1>
-                </div>
+                      </div>
   </div>
     
   
-
-
-
   <div class="quarto-title-meta">
 
       <div>
@@ -128,8 +199,301 @@ ul.task-list{list-style: none;}
 
 
 
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(corrr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(formattable)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">requireNamespace</span>(<span class="st">"bit64"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>pivot_wider_indices <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">|&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">add_count</span>(user_id, game_name) <span class="sc">|&gt;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">game_index =</span> <span class="fu">if_else</span>(</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        n <span class="sc">==</span> <span class="dv">1</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        game_name,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="fu">str_c</span>(game_name, index_name, <span class="at">sep =</span> <span class="st">"-"</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_wider</span>(</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">id_cols =</span> user_id,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">names_from =</span> game_index,</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">values_from =</span> test</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>format_dt <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  x <span class="sc">|&gt;</span> </span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(r, abs_r, icc), <span class="sc">~</span> <span class="fu">digits</span>(., <span class="dv">2</span>))) <span class="sc">|&gt;</span> </span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">formattable</span>(</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">list</span>(</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        <span class="at">abs_r =</span> <span class="fu">formatter</span>(</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>          <span class="st">"span"</span>,</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>          <span class="at">style =</span> <span class="sc">~</span> <span class="fu">style</span>(</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>            <span class="at">color =</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>              <span class="fu">case_when</span>(</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>                abs_r <span class="sc">&gt;</span> <span class="fu">quantile</span>(abs_r, <span class="fl">0.75</span>) <span class="sc">~</span> <span class="st">"red"</span>,</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>                abs_r <span class="sc">&gt;</span> <span class="fu">quantile</span>(abs_r, <span class="fl">0.25</span>) <span class="sc">~</span> <span class="st">"blue"</span>,</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>                <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"green"</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>              )</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>          )</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        <span class="at">icc =</span> <span class="fu">color_tile</span>(<span class="st">"transparent"</span>, <span class="st">"pink"</span>)</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.datatable</span>(<span class="at">rownames =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">::</span><span class="fu">tar_load</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  reliability_test_retest, </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">store =</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"preproc/_targets"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>ind_filt <span class="ot">&lt;-</span> readxl<span class="sc">::</span><span class="fu">read_excel</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"config/indices_filtering.xlsx"</span>))</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>indices_clean <span class="ot">&lt;-</span> targets<span class="sc">::</span><span class="fu">tar_read</span>(</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  indices_clean, </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">store =</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"preproc/_targets"</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">semi_join</span>(</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(ind_filt, check_result <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"target"</span>, <span class="st">"target-low"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">add_row</span>(<span class="at">game_name =</span> <span class="st">"瑞文高级推理"</span>, <span class="at">index_name =</span> <span class="st">"nc_test"</span>),</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"game_name"</span>, <span class="st">"index_name"</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="correlation-with-reasoning-tasks" class="level1">
+<h1>Correlation with Reasoning tasks</h1>
+<section id="rapm" class="level2">
+<h2 class="anchored" data-anchor-id="rapm">RAPM</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>indices_clean <span class="sc">|&gt;</span> </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(game_name_abbr <span class="sc">!=</span> <span class="st">"RAPM"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    indices_clean <span class="sc">|&gt;</span> </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">filter</span>(</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        game_name_abbr <span class="sc">==</span> <span class="st">"RAPM"</span>, </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        index_name <span class="sc">==</span> <span class="st">"nc_test"</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">|&gt;</span> </span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">select</span>(user_id, <span class="at">rapm =</span> test),</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">"user_id"</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(game_name, index_name) <span class="sc">|&gt;</span> </span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(test) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(rapm)),</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">r =</span> <span class="fu">cor</span>(test, rapm, <span class="at">use =</span> <span class="st">"complete"</span>),</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">abs_r =</span> <span class="fu">abs</span>(r)) <span class="sc">|&gt;</span> </span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(abs_r)) <span class="sc">|&gt;</span> </span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    reliability_test_retest <span class="sc">|&gt;</span> </span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>      <span class="fu">select</span>(game_name, index_name, <span class="at">icc =</span> icc_no_outlier),</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"game_name"</span>, <span class="st">"index_name"</span>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">format_dt</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+
+<div id="htmlwidget-5d7cd4129400d64bd8fe" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-5d7cd4129400d64bd8fe">{"x":{"filter":"none","vertical":false,"data":[["图形推理          ","美术卡片          ","人工语言-中级     ","登陆月球（中级）  ","数字卡片          ","眼耳并用          ","三维心理旋转测试  ","文字卡片          ","速算师（中级）    ","过目不忘PRO       ","格子卡片          ","按图索骥          ","魔术师终极        ","密码箱            ","塔罗牌            ","蝴蝶照相机        ","雪花收藏家        ","图形折叠          ","打靶场            ","顺背数PRO         ","语义判断          ","欢乐餐厅          ","候鸟迁徙PRO       ","各得其所          ","文字卡片          ","格子卡片          ","远距离联想        ","时间顺序判断      ","图片记忆          ","舒尔特方格（中级）","幸运小球          ","快速归类PRO       ","各得其所          ","多彩文字PRO       ","我是大厨          ","时长分辨          ","火眼金睛          ","方向临摹          ","强化学习          ","捉虫高级简版      ","位置记忆PRO       ","捉虫高级简版      ","宇宙黑洞          ","萤火虫PRO         ","魔术师终极        ","连点成画PRO       ","数感              ","数字卡片          ","美术卡片          ","连续再认          ","一心二用PRO       ","捉虫高级简版      ","变戏法            ","变色魔块PRO       ","声调判断          ","察颜观色PRO       ","节奏感知          ","太空飞船PRO       ","言语记忆          ","卡片分类PRO       ","变戏法            ","数感              ","察颜观色PRO       ","眼耳并用          ","候鸟迁徙PRO       "],["nc               ","dprime           ","nc               ","mean_log_err     ","dprime           ","dprime_both      ","nc               ","dprime           ","nc               ","mean_span_pcu    ","dprime           ","mean_log_err_both","dprime           ","mean_span_pcu    ","nc               ","mean_span_pcu    ","nc_cor           ","nc               ","mean_span_pcu    ","mean_span_pcu    ","nc               ","nc               ","cong_eff_ies     ","prop_perfect     ","mrt              ","mrt              ","nc               ","thresh_last_block","bps_score        ","nc_cor           ","mean_span_pcu    ","ies              ","mrt_init         ","cong_eff_ies     ","score_total      ","thresh_last_block","nc               ","mean_log_err     ","pc_test          ","rtsd             ","mean_span_pcu    ","dprime           ","mean_span_pcu    ","mean_span_pcu    ","mrt              ","nc               ","mrt              ","mrt              ","mrt              ","dprime           ","nc               ","mrt              ","ies              ","ssrt             ","nc               ","cong_eff_ies     ","thresh_last_block","cong_eff_ies     ","fm_dprime        ","switch_cost_mrt  ","mrt              ","w                ","switch_cost_ies  ","mrt_both         ","switch_cost_ies  "],["388","417","424","421","415","424","388","419","389","400","417","424","408","423","424","424","424","389","423","423","421","375","424","424","419","417","419","424","424","399","423","421","424","423","424","424","424","424","423","424","424","424","424","424","408","424","421","415","417","374","424","424","424","421","424","423","421","424","424","419","424","401","423","424","424"],["0.51","0.44","0.40","-0.40","0.40","0.39","0.36","0.35","0.35","0.35","0.34","-0.33","0.31","0.31","0.30","0.30","0.29","0.29","0.27","0.27","0.27","0.27","-0.26","0.26","0.26","0.26","0.24","-0.24","0.24","0.24","0.24","-0.23","0.23","-0.23","0.22","-0.22","0.22","-0.21","0.21","-0.21","0.21","0.21","0.21","0.20","0.20","0.17","0.17","0.16","0.15","0.15","0.14","-0.13","-0.13","-0.12","0.12","-0.11","-0.08","-0.08","0.07","0.04","-0.04","-0.03","0.02","-0.01","0.01"],["<span style=\"color: red\">0.51<\/span>  ","<span style=\"color: red\">0.44<\/span>  ","<span style=\"color: red\">0.40<\/span>  ","<span style=\"color: red\">0.40<\/span>  ","<span style=\"color: red\">0.40<\/span>  ","<span style=\"color: red\">0.39<\/span>  ","<span style=\"color: red\">0.36<\/span>  ","<span style=\"color: red\">0.35<\/span>  ","<span style=\"color: red\">0.35<\/span>  ","<span style=\"color: red\">0.35<\/span>  ","<span style=\"color: red\">0.34<\/span>  ","<span style=\"color: red\">0.33<\/span>  ","<span style=\"color: red\">0.31<\/span>  ","<span style=\"color: red\">0.31<\/span>  ","<span style=\"color: red\">0.30<\/span>  ","<span style=\"color: red\">0.30<\/span>  ","<span style=\"color: blue\">0.29<\/span> ","<span style=\"color: blue\">0.29<\/span> ","<span style=\"color: blue\">0.27<\/span> ","<span style=\"color: blue\">0.27<\/span> ","<span style=\"color: blue\">0.27<\/span> ","<span style=\"color: blue\">0.27<\/span> ","<span style=\"color: blue\">0.26<\/span> ","<span style=\"color: blue\">0.26<\/span> ","<span style=\"color: blue\">0.26<\/span> ","<span style=\"color: blue\">0.26<\/span> ","<span style=\"color: blue\">0.24<\/span> ","<span style=\"color: blue\">0.24<\/span> ","<span style=\"color: blue\">0.24<\/span> ","<span style=\"color: blue\">0.24<\/span> ","<span style=\"color: blue\">0.24<\/span> ","<span style=\"color: blue\">0.23<\/span> ","<span style=\"color: blue\">0.23<\/span> ","<span style=\"color: blue\">0.23<\/span> ","<span style=\"color: blue\">0.22<\/span> ","<span style=\"color: blue\">0.22<\/span> ","<span style=\"color: blue\">0.22<\/span> ","<span style=\"color: blue\">0.21<\/span> ","<span style=\"color: blue\">0.21<\/span> ","<span style=\"color: blue\">0.21<\/span> ","<span style=\"color: blue\">0.21<\/span> ","<span style=\"color: blue\">0.21<\/span> ","<span style=\"color: blue\">0.21<\/span> ","<span style=\"color: blue\">0.20<\/span> ","<span style=\"color: blue\">0.20<\/span> ","<span style=\"color: blue\">0.17<\/span> ","<span style=\"color: blue\">0.17<\/span> ","<span style=\"color: blue\">0.16<\/span> ","<span style=\"color: green\">0.15<\/span>","<span style=\"color: green\">0.15<\/span>","<span style=\"color: green\">0.14<\/span>","<span style=\"color: green\">0.13<\/span>","<span style=\"color: green\">0.13<\/span>","<span style=\"color: green\">0.12<\/span>","<span style=\"color: green\">0.12<\/span>","<span style=\"color: green\">0.11<\/span>","<span style=\"color: green\">0.08<\/span>","<span style=\"color: green\">0.08<\/span>","<span style=\"color: green\">0.07<\/span>","<span style=\"color: green\">0.04<\/span>","<span style=\"color: green\">0.04<\/span>","<span style=\"color: green\">0.03<\/span>","<span style=\"color: green\">0.02<\/span>","<span style=\"color: green\">0.01<\/span>","<span style=\"color: green\">0.01<\/span>"],["<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd7de\">0.53<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd3da\">0.58<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6dd\">0.53<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd1d9\">0.60<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffced7\">0.63<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd8de\">0.52<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffc7d0\">0.72<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffcbd4\">0.67<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffc0cb\">0.80<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe8ec\">0.33<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffc8d1\">0.71<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdae1\">0.49<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd8de\">0.52<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd9df\">0.50<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdbe1\">0.47<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffced7\">0.63<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd9e0\">0.50<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd9e0\">0.50<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdae0\">0.50<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffc7d0\">0.72<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd2da\">0.58<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe1e6\">0.40<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffccd5\">0.66<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe8ec\">0.33<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd7de\">0.52<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd7de\">0.52<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe3e8\">0.38<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd3da\">0.58<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffced7\">0.63<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd8de\">0.52<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd4db\">0.57<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffcad3\">0.68<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffcad3\">0.68<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdbe1\">0.48<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #fff3f5\">0.19<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd3da\">0.57<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd1d9\">0.60<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd0d8\">0.61<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffeaee\">0.30<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd3da\">0.58<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd3da\">0.58<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd9df\">0.50<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd2da\">0.59<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd4db\">0.56<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe1e6\">0.40<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6dd\">0.54<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffccd5\">0.66<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd1d9\">0.59<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd5dc\">0.55<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe7eb\">0.33<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd5dc\">0.55<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdbe1\">0.48<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd8df\">0.51<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdbe2\">0.47<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffc4ce\">0.75<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6dd\">0.54<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdee4\">0.44<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffcdd6\">0.64<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffffff\">0.06<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe0e5\">0.42<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd7de\">0.53<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffccd5\">0.65<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdde3\">0.45<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdbe1\">0.47<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe3e8\">0.38<\/span>"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>game_name<\/th>\n      <th>index_name<\/th>\n      <th>n<\/th>\n      <th>r<\/th>\n      <th>abs_r<\/th>\n      <th>icc<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</section>
+<section id="nonverbal-reasoning" class="level2">
+<h2 class="anchored" data-anchor-id="nonverbal-reasoning">Nonverbal Reasoning</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>indices_clean <span class="sc">|&gt;</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(game_name_abbr <span class="sc">!=</span> <span class="st">"NVR"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    indices_clean <span class="sc">|&gt;</span> </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">filter</span>(game_name_abbr <span class="sc">==</span> <span class="st">"NVR"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">select</span>(user_id, <span class="at">nvr =</span> test),</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">"user_id"</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(game_name, index_name) <span class="sc">|&gt;</span> </span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(test) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(nvr)),</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">r =</span> <span class="fu">cor</span>(test, nvr, <span class="at">use =</span> <span class="st">"complete"</span>),</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">100</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">abs_r =</span> <span class="fu">abs</span>(r)) <span class="sc">|&gt;</span> </span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(abs_r)) <span class="sc">|&gt;</span> </span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    reliability_test_retest <span class="sc">|&gt;</span> </span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">select</span>(game_name, index_name, <span class="at">icc =</span> icc_no_outlier),</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"game_name"</span>, <span class="st">"index_name"</span>)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">format_dt</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+
+<div id="htmlwidget-281c17c990357749ae4c" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-281c17c990357749ae4c">{"x":{"filter":"none","vertical":false,"data":[["瑞文高级推理      ","雪花收藏家        ","美术卡片          ","三维心理旋转测试  ","人工语言-中级     ","格子卡片          ","按图索骥          ","登陆月球（中级）  ","数字卡片          ","语义判断          ","眼耳并用          ","文字卡片          ","位置记忆PRO       ","捉虫高级简版      ","时间顺序判断      ","远距离联想        ","图形折叠          ","火眼金睛          ","打靶场            ","欢乐餐厅          ","方向临摹          ","魔术师终极        ","宇宙黑洞          ","过目不忘PRO       ","格子卡片          ","密码箱            ","图片记忆          ","舒尔特方格（中级）","候鸟迁徙PRO       ","速算师（中级）    ","文字卡片          ","快速归类PRO       ","连续再认          ","塔罗牌            ","捉虫高级简版      ","各得其所          ","顺背数PRO         ","蝴蝶照相机        ","萤火虫PRO         ","幸运小球          ","各得其所          ","时长分辨          ","连点成画PRO       ","我是大厨          ","变戏法            ","强化学习          ","卡片分类PRO       ","一心二用PRO       ","数字卡片          ","太空飞船PRO       ","声调判断          ","捉虫高级简版      ","变色魔块PRO       ","变戏法            ","言语记忆          ","多彩文字PRO       ","魔术师终极        ","节奏感知          ","数感              ","美术卡片          ","数感              ","察颜观色PRO       ","察颜观色PRO       ","候鸟迁徙PRO       ","眼耳并用          "],["nc_test          ","nc_cor           ","dprime           ","nc               ","nc               ","dprime           ","mean_log_err_both","mean_log_err     ","dprime           ","nc               ","dprime_both      ","dprime           ","mean_span_pcu    ","rtsd             ","thresh_last_block","nc               ","nc               ","nc               ","mean_span_pcu    ","nc               ","mean_log_err     ","dprime           ","mean_span_pcu    ","mean_span_pcu    ","mrt              ","mean_span_pcu    ","bps_score        ","nc_cor           ","cong_eff_ies     ","nc               ","mrt              ","ies              ","dprime           ","nc               ","dprime           ","prop_perfect     ","mean_span_pcu    ","mean_span_pcu    ","mean_span_pcu    ","mean_span_pcu    ","mrt_init         ","thresh_last_block","nc               ","score_total      ","ies              ","pc_test          ","switch_cost_mrt  ","nc               ","mrt              ","cong_eff_ies     ","nc               ","mrt              ","ssrt             ","mrt              ","fm_dprime        ","cong_eff_ies     ","mrt              ","thresh_last_block","mrt              ","mrt              ","w                ","cong_eff_ies     ","switch_cost_ies  ","switch_cost_ies  ","mrt_both         "],["388","415","407","416","414","406","416","385","405","412","414","407","416","414","414","412","413","416","414","392","416","375","414","391","406","387","415","365","414","354","407","411","392","414","414","414","415","416","416","387","414","414","416","388","414","414","384","415","405","415","415","414","386","414","415","414","375","386","386","407","369","414","414","414","414"],["0.51","0.39","0.36","0.35","0.34","0.34","-0.34","-0.32","0.31","0.31","0.30","0.30","0.29","-0.29","-0.29","0.28","0.28","0.27","0.27","0.27","-0.26","0.26","0.26","0.26","0.25","0.25","0.25","0.25","-0.24","0.24","0.23","-0.23","0.22","0.21","0.21","0.21","0.20","0.20","0.19","0.18","0.16","-0.16","0.15","0.14","-0.13","0.12","0.12","0.11","0.11","-0.10","0.10","-0.09","-0.09","-0.09","0.09","-0.09","0.09","-0.08","0.08","0.07","-0.07","-0.06","0.04","0.03","0.01"],["<span style=\"color: red\">0.51<\/span>  ","<span style=\"color: red\">0.39<\/span>  ","<span style=\"color: red\">0.36<\/span>  ","<span style=\"color: red\">0.35<\/span>  ","<span style=\"color: red\">0.34<\/span>  ","<span style=\"color: red\">0.34<\/span>  ","<span style=\"color: red\">0.34<\/span>  ","<span style=\"color: red\">0.32<\/span>  ","<span style=\"color: red\">0.31<\/span>  ","<span style=\"color: red\">0.31<\/span>  ","<span style=\"color: red\">0.30<\/span>  ","<span style=\"color: red\">0.30<\/span>  ","<span style=\"color: red\">0.29<\/span>  ","<span style=\"color: red\">0.29<\/span>  ","<span style=\"color: red\">0.29<\/span>  ","<span style=\"color: red\">0.28<\/span>  ","<span style=\"color: blue\">0.28<\/span> ","<span style=\"color: blue\">0.27<\/span> ","<span style=\"color: blue\">0.27<\/span> ","<span style=\"color: blue\">0.27<\/span> ","<span style=\"color: blue\">0.26<\/span> ","<span style=\"color: blue\">0.26<\/span> ","<span style=\"color: blue\">0.26<\/span> ","<span style=\"color: blue\">0.26<\/span> ","<span style=\"color: blue\">0.25<\/span> ","<span style=\"color: blue\">0.25<\/span> ","<span style=\"color: blue\">0.25<\/span> ","<span style=\"color: blue\">0.25<\/span> ","<span style=\"color: blue\">0.24<\/span> ","<span style=\"color: blue\">0.24<\/span> ","<span style=\"color: blue\">0.23<\/span> ","<span style=\"color: blue\">0.23<\/span> ","<span style=\"color: blue\">0.22<\/span> ","<span style=\"color: blue\">0.21<\/span> ","<span style=\"color: blue\">0.21<\/span> ","<span style=\"color: blue\">0.21<\/span> ","<span style=\"color: blue\">0.20<\/span> ","<span style=\"color: blue\">0.20<\/span> ","<span style=\"color: blue\">0.19<\/span> ","<span style=\"color: blue\">0.18<\/span> ","<span style=\"color: blue\">0.16<\/span> ","<span style=\"color: blue\">0.16<\/span> ","<span style=\"color: blue\">0.15<\/span> ","<span style=\"color: blue\">0.14<\/span> ","<span style=\"color: blue\">0.13<\/span> ","<span style=\"color: blue\">0.12<\/span> ","<span style=\"color: blue\">0.12<\/span> ","<span style=\"color: blue\">0.11<\/span> ","<span style=\"color: green\">0.11<\/span>","<span style=\"color: green\">0.10<\/span>","<span style=\"color: green\">0.10<\/span>","<span style=\"color: green\">0.09<\/span>","<span style=\"color: green\">0.09<\/span>","<span style=\"color: green\">0.09<\/span>","<span style=\"color: green\">0.09<\/span>","<span style=\"color: green\">0.09<\/span>","<span style=\"color: green\">0.09<\/span>","<span style=\"color: green\">0.08<\/span>","<span style=\"color: green\">0.08<\/span>","<span style=\"color: green\">0.07<\/span>","<span style=\"color: green\">0.07<\/span>","<span style=\"color: green\">0.06<\/span>","<span style=\"color: green\">0.04<\/span>","<span style=\"color: green\">0.03<\/span>","<span style=\"color: green\">0.01<\/span>"],["<span style=\"display: block; padding: 0 4px; border-radius: 4px\"> NA<\/span>                            ","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd9e0\">0.50<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd3da\">0.58<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffc7d0\">0.72<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6dd\">0.53<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffc8d1\">0.71<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdae1\">0.49<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd1d9\">0.60<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffced7\">0.63<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd2da\">0.58<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd8de\">0.52<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffcbd4\">0.67<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd3da\">0.58<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd3da\">0.58<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd3da\">0.58<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe3e8\">0.38<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd9e0\">0.50<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd1d9\">0.60<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdae0\">0.50<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe1e6\">0.40<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd0d8\">0.61<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd8de\">0.52<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd2da\">0.59<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe8ec\">0.33<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd7de\">0.52<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd9df\">0.50<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffced7\">0.63<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd8de\">0.52<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffccd5\">0.66<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffc0cb\">0.80<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd7de\">0.52<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffcad3\">0.68<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe7eb\">0.33<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdbe1\">0.47<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd9df\">0.50<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe8ec\">0.33<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffc7d0\">0.72<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffced7\">0.63<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd4db\">0.56<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd4db\">0.57<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffcad3\">0.68<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd3da\">0.57<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6dd\">0.54<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #fff3f5\">0.19<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd8df\">0.51<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffeaee\">0.30<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe0e5\">0.42<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd5dc\">0.55<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd1d9\">0.59<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffcdd6\">0.64<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffc4ce\">0.75<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdbe1\">0.48<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdbe2\">0.47<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd7de\">0.53<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffffff\">0.06<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdbe1\">0.48<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe1e6\">0.40<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdee4\">0.44<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffccd5\">0.66<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd5dc\">0.55<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffccd5\">0.65<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6dd\">0.54<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdde3\">0.45<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe3e8\">0.38<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdbe1\">0.47<\/span>"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>game_name<\/th>\n      <th>index_name<\/th>\n      <th>n<\/th>\n      <th>r<\/th>\n      <th>abs_r<\/th>\n      <th>icc<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</section>
+</section>
+<section id="correlation-with-visual-spatial-working-memory-tasks" class="level1">
+<h1>Correlation with Visual-Spatial Working Memory Tasks</h1>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>indices_viswm <span class="ot">&lt;-</span> indices_clean <span class="sc">|&gt;</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">semi_join</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    ind_filt <span class="sc">|&gt;</span> </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">filter</span>(</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        dimension <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"complex span"</span>, <span class="st">"working memory"</span>, <span class="st">"short term memory"</span>),</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        check_result <span class="sc">==</span> <span class="st">"target"</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"game_name"</span>, <span class="st">"index_name"</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider_indices</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="the-latent-factor-model-heirachical-model" class="level2">
+<h2 class="anchored" data-anchor-id="the-latent-factor-model-heirachical-model">The Latent Factor Model (heirachical model)</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fitted <span class="ot">&lt;-</span> lavaan<span class="sc">::</span><span class="fu">cfa</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">'Common =~ Updating + VerbalSTM + SpatialSTM</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="st">  Updating =~ `美术卡片` + `数字卡片` + `格子卡片` + `文字卡片`</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="st">  VerbalSTM =~ `幸运小球` + `密码箱` + `顺背数PRO`</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="st">  SpatialSTM =~ `宇宙黑洞` + `打靶场` + `蝴蝶照相机` + `位置记忆PRO`'</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  indices_viswm, <span class="at">std.lv =</span> <span class="cn">TRUE</span>, <span class="at">std.ov =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">estimator =</span> <span class="st">"MLR"</span>, <span class="at">missing =</span> <span class="st">"ml"</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>semPlot<span class="sc">::</span><span class="fu">semPaths</span>(</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  fitted, <span class="at">what =</span> <span class="st">"std"</span>, <span class="at">edge.color =</span> <span class="st">"black"</span>, <span class="at">layout =</span> <span class="st">"tree2"</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">sizeMan =</span> <span class="dv">6</span>, <span class="at">sizeLat =</span> <span class="dv">8</span>, <span class="at">edge.label.cex =</span> <span class="fl">0.6</span>, <span class="at">intercepts =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">nCharEdges =</span> <span class="dv">5</span>, <span class="at">esize =</span> <span class="dv">1</span>, <span class="at">trans =</span> <span class="dv">1</span>, <span class="at">nCharNodes =</span> <span class="dv">0</span>,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">bifactor =</span> <span class="st">"Common"</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>lavaan<span class="sc">::</span><span class="fu">summary</span>(fitted, <span class="at">fit.measures =</span> <span class="cn">TRUE</span>, <span class="at">estimates =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>lavaan 0.6-11 ended normally after 34 iterations
+
+  Estimator                                         ML
+  Optimization method                           NLMINB
+  Number of model parameters                        36
+                                                      
+  Number of observations                           515
+  Number of missing patterns                        26
+                                                      
+Model Test User Model:
+                                               Standard      Robust
+  Test Statistic                                119.832     114.108
+  Degrees of freedom                                 41          41
+  P-value (Chi-square)                            0.000       0.000
+  Scaling correction factor                                   1.050
+       Yuan-Bentler correction (Mplus variant)                     
+
+Model Test Baseline Model:
+
+  Test statistic                              1493.661    1199.093
+  Degrees of freedom                                55          55
+  P-value                                        0.000       0.000
+  Scaling correction factor                                  1.246
+
+User Model versus Baseline Model:
+
+  Comparative Fit Index (CFI)                    0.945       0.936
+  Tucker-Lewis Index (TLI)                       0.926       0.914
+                                                                  
+  Robust Comparative Fit Index (CFI)                         0.946
+  Robust Tucker-Lewis Index (TLI)                            0.928
+
+Loglikelihood and Information Criteria:
+
+  Loglikelihood user model (H0)              -6490.246   -6490.246
+  Scaling correction factor                                  1.867
+      for the MLR correction                                      
+  Loglikelihood unrestricted model (H1)      -6430.330   -6430.330
+  Scaling correction factor                                  1.432
+      for the MLR correction                                      
+                                                                  
+  Akaike (AIC)                               13052.493   13052.493
+  Bayesian (BIC)                             13205.283   13205.283
+  Sample-size adjusted Bayesian (BIC)        13091.013   13091.013
+
+Root Mean Square Error of Approximation:
+
+  RMSEA                                          0.061       0.059
+  90 Percent confidence interval - lower         0.049       0.046
+  90 Percent confidence interval - upper         0.074       0.071
+  P-value RMSEA &lt;= 0.05                          0.071       0.116
+                                                                  
+  Robust RMSEA                                               0.060
+  90 Percent confidence interval - lower                     0.047
+  90 Percent confidence interval - upper                     0.074
+
+Standardized Root Mean Square Residual:
+
+  SRMR                                           0.038       0.038</code></pre>
+</div>
+</div>
+</section>
+<section id="common-factor" class="level2">
+<h2 class="anchored" data-anchor-id="common-factor">Common Factor</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>scores_latent <span class="ot">&lt;-</span> <span class="fu">bind_cols</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(indices_viswm, user_id),</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  lavaan<span class="sc">::</span><span class="fu">predict</span>(fitted) <span class="sc">|&gt;</span> </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unclass</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as_tibble</span>()</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>indices_clean <span class="sc">|&gt;</span> </span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    scores_latent,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">"user_id"</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(game_name, index_name) <span class="sc">|&gt;</span> </span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(test) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(Common)),</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">r =</span> <span class="fu">cor</span>(test, Common, <span class="at">use =</span> <span class="st">"complete"</span>),</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">abs_r =</span> <span class="fu">abs</span>(r)) <span class="sc">|&gt;</span> </span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(abs_r)) <span class="sc">|&gt;</span> </span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    reliability_test_retest <span class="sc">|&gt;</span> </span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>      <span class="fu">select</span>(game_name, index_name, <span class="at">icc =</span> icc_no_outlier),</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"game_name"</span>, <span class="st">"index_name"</span>)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">format_dt</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+
+<div id="htmlwidget-aadb35a304bdcb24f840" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-aadb35a304bdcb24f840">{"x":{"filter":"none","vertical":false,"data":[["蝴蝶照相机        ","美术卡片          ","密码箱            ","打靶场            ","数字卡片          ","格子卡片          ","文字卡片          ","幸运小球          ","位置记忆PRO       ","顺背数PRO         ","速算师（中级）    ","按图索骥          ","过目不忘PRO       ","眼耳并用          ","宇宙黑洞          ","魔术师终极        ","瑞文高级推理      ","欢乐餐厅          ","快速归类PRO       ","人工语言-中级     ","图形推理          ","登陆月球（中级）  ","候鸟迁徙PRO       ","时间顺序判断      ","三维心理旋转测试  ","语义判断          ","塔罗牌            ","图片记忆          ","变戏法            ","萤火虫PRO         ","捉虫高级简版      ","文字卡片          ","雪花收藏家        ","连点成画PRO       ","图形折叠          ","格子卡片          ","我是大厨          ","一心二用PRO       ","舒尔特方格（中级）","捉虫高级简版      ","远距离联想        ","火眼金睛          ","各得其所          ","多彩文字PRO       ","声调判断          ","时长分辨          ","方向临摹          ","强化学习          ","数字卡片          ","魔术师终极        ","美术卡片          ","节奏感知          ","捉虫高级简版      ","变色魔块PRO       ","连续再认          ","变戏法            ","各得其所          ","太空飞船PRO       ","数感              ","眼耳并用          ","察颜观色PRO       ","言语记忆          ","数感              ","卡片分类PRO       ","察颜观色PRO       ","候鸟迁徙PRO       "],["mean_span_pcu    ","dprime           ","mean_span_pcu    ","mean_span_pcu    ","dprime           ","dprime           ","dprime           ","mean_span_pcu    ","mean_span_pcu    ","mean_span_pcu    ","nc               ","mean_log_err_both","mean_span_pcu    ","dprime_both      ","mean_span_pcu    ","dprime           ","nc_test          ","nc               ","ies              ","nc               ","nc               ","mean_log_err     ","cong_eff_ies     ","thresh_last_block","nc               ","nc               ","nc               ","bps_score        ","ies              ","mean_span_pcu    ","dprime           ","mrt              ","nc_cor           ","nc               ","nc               ","mrt              ","score_total      ","nc               ","nc_cor           ","rtsd             ","nc               ","nc               ","prop_perfect     ","cong_eff_ies     ","nc               ","thresh_last_block","mean_log_err     ","pc_test          ","mrt              ","mrt              ","mrt              ","thresh_last_block","mrt              ","ssrt             ","dprime           ","mrt              ","mrt_init         ","cong_eff_ies     ","mrt              ","mrt_both         ","cong_eff_ies     ","fm_dprime        ","w                ","switch_cost_mrt  ","switch_cost_ies  ","switch_cost_ies  "],["454","452","471","450","449","454","456","471","454","451","398","454","475","460","500","422","424","402","457","454","416","469","460","463","416","458","460","460","460","454","460","456","451","454","416","454","472","461","447","460","446","454","498","462","464","463","454","463","449","422","452","481","460","481","402","460","498","461","481","460","463","464","458","477","463","460"],["0.69","0.68","0.66","0.66","0.65","0.65","0.61","0.60","0.58","0.57","0.53","-0.52","0.52","0.52","0.50","0.50","0.48","0.46","-0.44","0.43","0.43","-0.42","-0.42","-0.40","0.38","0.38","0.37","0.36","-0.35","0.34","0.34","0.33","0.32","0.32","0.31","0.31","0.31","0.31","0.30","-0.30","0.29","0.29","0.28","-0.28","0.28","-0.27","-0.26","0.26","0.24","0.24","0.23","-0.23","-0.22","-0.21","0.21","-0.18","0.17","-0.13","0.11","-0.09","-0.09","0.08","-0.06","0.05","-0.03","-0.01"],["<span style=\"color: red\">0.69<\/span>  ","<span style=\"color: red\">0.68<\/span>  ","<span style=\"color: red\">0.66<\/span>  ","<span style=\"color: red\">0.66<\/span>  ","<span style=\"color: red\">0.65<\/span>  ","<span style=\"color: red\">0.65<\/span>  ","<span style=\"color: red\">0.61<\/span>  ","<span style=\"color: red\">0.60<\/span>  ","<span style=\"color: red\">0.58<\/span>  ","<span style=\"color: red\">0.57<\/span>  ","<span style=\"color: red\">0.53<\/span>  ","<span style=\"color: red\">0.52<\/span>  ","<span style=\"color: red\">0.52<\/span>  ","<span style=\"color: red\">0.52<\/span>  ","<span style=\"color: red\">0.50<\/span>  ","<span style=\"color: red\">0.50<\/span>  ","<span style=\"color: red\">0.48<\/span>  ","<span style=\"color: blue\">0.46<\/span> ","<span style=\"color: blue\">0.44<\/span> ","<span style=\"color: blue\">0.43<\/span> ","<span style=\"color: blue\">0.43<\/span> ","<span style=\"color: blue\">0.42<\/span> ","<span style=\"color: blue\">0.42<\/span> ","<span style=\"color: blue\">0.40<\/span> ","<span style=\"color: blue\">0.38<\/span> ","<span style=\"color: blue\">0.38<\/span> ","<span style=\"color: blue\">0.37<\/span> ","<span style=\"color: blue\">0.36<\/span> ","<span style=\"color: blue\">0.35<\/span> ","<span style=\"color: blue\">0.34<\/span> ","<span style=\"color: blue\">0.34<\/span> ","<span style=\"color: blue\">0.33<\/span> ","<span style=\"color: blue\">0.32<\/span> ","<span style=\"color: blue\">0.32<\/span> ","<span style=\"color: blue\">0.31<\/span> ","<span style=\"color: blue\">0.31<\/span> ","<span style=\"color: blue\">0.31<\/span> ","<span style=\"color: blue\">0.31<\/span> ","<span style=\"color: blue\">0.30<\/span> ","<span style=\"color: blue\">0.30<\/span> ","<span style=\"color: blue\">0.29<\/span> ","<span style=\"color: blue\">0.29<\/span> ","<span style=\"color: blue\">0.28<\/span> ","<span style=\"color: blue\">0.28<\/span> ","<span style=\"color: blue\">0.28<\/span> ","<span style=\"color: blue\">0.27<\/span> ","<span style=\"color: blue\">0.26<\/span> ","<span style=\"color: blue\">0.26<\/span> ","<span style=\"color: blue\">0.24<\/span> ","<span style=\"color: green\">0.24<\/span>","<span style=\"color: green\">0.23<\/span>","<span style=\"color: green\">0.23<\/span>","<span style=\"color: green\">0.22<\/span>","<span style=\"color: green\">0.21<\/span>","<span style=\"color: green\">0.21<\/span>","<span style=\"color: green\">0.18<\/span>","<span style=\"color: green\">0.17<\/span>","<span style=\"color: green\">0.13<\/span>","<span style=\"color: green\">0.11<\/span>","<span style=\"color: green\">0.09<\/span>","<span style=\"color: green\">0.09<\/span>","<span style=\"color: green\">0.08<\/span>","<span style=\"color: green\">0.06<\/span>","<span style=\"color: green\">0.05<\/span>","<span style=\"color: green\">0.03<\/span>","<span style=\"color: green\">0.01<\/span>"],["<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffced7\">0.63<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd3da\">0.58<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd9df\">0.50<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdae0\">0.50<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffced7\">0.63<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffc8d1\">0.71<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffcbd4\">0.67<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd4db\">0.57<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd3da\">0.58<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffc7d0\">0.72<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffc0cb\">0.80<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdae1\">0.49<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe8ec\">0.33<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd8de\">0.52<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd2da\">0.59<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd8de\">0.52<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px\"> NA<\/span>                            ","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe1e6\">0.40<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffcad3\">0.68<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6dd\">0.53<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd7de\">0.53<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd1d9\">0.60<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffccd5\">0.66<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd3da\">0.58<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffc7d0\">0.72<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd2da\">0.58<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdbe1\">0.47<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffced7\">0.63<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd8df\">0.51<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd4db\">0.56<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd9df\">0.50<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd7de\">0.52<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd9e0\">0.50<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6dd\">0.54<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd9e0\">0.50<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd7de\">0.52<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #fff3f5\">0.19<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd5dc\">0.55<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd8de\">0.52<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd3da\">0.58<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe3e8\">0.38<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd1d9\">0.60<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe8ec\">0.33<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdbe1\">0.48<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffc4ce\">0.75<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd3da\">0.57<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd0d8\">0.61<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffeaee\">0.30<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd1d9\">0.59<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe1e6\">0.40<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd5dc\">0.55<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdee4\">0.44<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdbe1\">0.48<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdbe2\">0.47<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe7eb\">0.33<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd7de\">0.53<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffcad3\">0.68<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffcdd6\">0.64<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffccd5\">0.66<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdbe1\">0.47<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6dd\">0.54<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffffff\">0.06<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffccd5\">0.65<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe0e5\">0.42<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffdde3\">0.45<\/span>","<span style=\"display: block; padding: 0 4px; border-radius: 4px; background-color: #ffe3e8\">0.38<\/span>"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>game_name<\/th>\n      <th>index_name<\/th>\n      <th>n<\/th>\n      <th>r<\/th>\n      <th>abs_r<\/th>\n      <th>icc<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
