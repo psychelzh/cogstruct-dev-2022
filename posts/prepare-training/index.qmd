@@ -141,6 +141,43 @@ indices_clean |>
   format_dt()
 ```
 
+## Average of these two tasks
+
+```{r}
+mean_scores <- indices_clean |> 
+  filter(
+    game_name_abbr == "NVR" |
+      (game_name_abbr == "RAPM" & index_name == "nc_test")
+  ) |> 
+  pivot_wider(
+    id_cols = user_id,
+    names_from = game_name_abbr,
+    values_from = test
+  ) |> 
+  mutate(
+    across(c(NVR, RAPM), ~ scale(.)[, 1]),
+    score_avg = map2_dbl(NVR, RAPM, ~ (.x + .y) / 2)
+  )
+indices_clean |> 
+  filter(!game_name_abbr %in% c("NVR", "RAPM")) |> 
+  inner_join(mean_scores, by = "user_id") |> 
+  group_by(game_name, index_name) |> 
+  summarise(
+    n = sum(!is.na(test) & !is.na(score_avg)),
+    r = cor(test, score_avg, use = "complete"),
+    .groups = "drop"
+  ) |> 
+  filter(n > 100) |> 
+  mutate(abs_r = abs(r)) |> 
+  arrange(desc(abs_r)) |> 
+  left_join(
+    reliability_test_retest |> 
+      select(game_name, index_name, icc = icc_no_outlier),
+    by = c("game_name", "index_name")
+  ) |> 
+  format_dt()
+```
+
 # Correlation with Visual-Spatial Working Memory Tasks
 
 ```{r}
