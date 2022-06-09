@@ -150,7 +150,7 @@ indices_viswm <- indices_clean |>
   pivot_wider_indices()
 ```
 
-## The Latent Factor Model (heirachical model)
+## The Latent Factor Model (hierarchical model)
 
 ```{r}
 fitted <- lavaan::cfa(
