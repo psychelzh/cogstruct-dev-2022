@@ -179,7 +179,7 @@
     "href": "posts/prepare-training/index.html",
     "title": "Prepare Tasks for Cognitive Training Project",
     "section": "",
-    "text": "Code\nlibrary(tidyverse)\nlibrary(corrr)\nlibrary(formattable)\nrequireNamespace(\"bit64\")"
+    "text": "Code\nlibrary(tidyverse)\nlibrary(corrr)\nlibrary(formattable)\nrequireNamespace(\"bit64\")\nA basic principle choosing tasks for measuring training transfer effect is based on the correlations between the chosen tasks and the target tasks. Two types of target tasks are now selected:\nHere the correlations with these two types of tasks are calculated as follows."
   },
   {
     "objectID": "posts/prepare-training/index.html#rapm",

@@ -74,6 +74,13 @@ indices_clean <- targets::tar_read(
   )
 ```
 
+A basic principle choosing tasks for measuring training transfer effect is based on the correlations between the chosen tasks and the target tasks. Two types of target tasks are now selected: 
+
+* Reasoning tasks: currently only two, namely, Raven's Advanced Progressive Matrices (RAPM) and Non-verbal Reasoning Task.
+* Visuo-spatial working memory tasks.
+
+Here the correlations with these two types of tasks are calculated as follows.
+
 # Correlation with Reasoning tasks
 
 ## RAPM 
