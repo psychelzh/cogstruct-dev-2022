@@ -55,31 +55,42 @@ validate_raw_parsed <- function(data_parsed, games_req_kb) {
       map2_lgl(
         raw_parsed, game_name,
         check_raw_data
-      ),
-      case_when(
-        game_name == "瑞文高级推理" ~ TRUE,
-        # vital errors in the task programs for these days
-        str_detect(
-          game_name,
-          str_c(
-            c("图形推理", "图形折叠", "三维心理旋转测试"),
-            collapse = "|"
-          )
-        ) ~ game_time < "2022-04-28" | game_time > "2022-05-07",
-        # item not proper for these games for these days
-        str_detect(
-          game_name,
-          str_c(
-            c("文字推理", "数字推理"),
-            collapse = "|"
-          )
-        ) ~ game_time > "2022-06-01",
-        TRUE ~ game_version == max(game_version)
       )
     )
 }
 clean_indices <- function(indices) {
+  check_version <- function(x) {
+    x |> 
+      group_by(game_name) |> 
+      filter(
+        case_when(
+          game_name == "瑞文高级推理" ~ TRUE,
+          # newer versions of these games have few data
+          game_name == "舒尔特方格（中级）" ~ game_version == "2.0.0",
+          game_name == "过目不忘PRO" ~ game_version == "1.0.0",
+          # vital errors in the task programs for these days
+          str_detect(
+            game_name,
+            str_c(
+              c("图形推理", "图形折叠", "三维心理旋转测试"),
+              collapse = "|"
+            )
+          ) ~ game_time < "2022-04-28" | game_time > "2022-05-07",
+          # item not proper for these games for these days
+          str_detect(
+            game_name,
+            str_c(
+              c("文字推理", "数字推理"),
+              collapse = "|"
+            )
+          ) ~ game_time > "2022-06-01",
+          TRUE ~ game_version == max(game_version)
+        )
+      ) |> 
+      ungroup()
+  }
   indices |>
+    check_version() |> 
     left_join(data.iquizoo::game_info, by = c("game_id", "game_name")) |>
     group_by(user_id, game_name, index_name) |>
     filter(
@@ -90,7 +101,7 @@ clean_indices <- function(indices) {
       )
     ) |>
     ungroup() |>
-    group_by(user_id, game_name_abbr, game_name, game_version, index_name) |>
+    group_by(user_id, game_name_abbr, game_name, index_name) |>
     mutate(
       occasion = case_when(
         str_detect(game_name_abbr, "A$") ~ "test",
@@ -103,7 +114,7 @@ clean_indices <- function(indices) {
     ungroup() |>
     mutate(across(starts_with("game_name"), ~ str_remove(.x, "[A|B]$"))) |>
     pivot_wider(
-      id_cols = c(user_id, game_name, game_name_abbr, game_version, index_name),
+      id_cols = c(user_id, game_name, game_name_abbr, index_name),
       names_from = occasion,
       values_from = score
     )
@@ -321,7 +332,7 @@ list(
           as_tibble()
       ) |>
       ungroup() |>
-      group_by(game_name, game_name_abbr, game_version, index_name) |>
+      group_by(game_name, game_name_abbr, index_name) |>
       group_modify(
         possibly(
           ~ tibble(
@@ -393,7 +404,7 @@ list(
     reliability_test_retest |>
       full_join(
         reliability_test_retest_odd,
-        by = c("game_name", "game_name_abbr", "game_version", "index_name")
+        by = c("game_name", "game_name_abbr", "index_name")
       ) |>
       full_join(
         bind_rows(reliability_split_half, reliability_alpha) |>
