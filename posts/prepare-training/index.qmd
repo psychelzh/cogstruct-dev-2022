@@ -67,11 +67,17 @@ indices_clean <- targets::tar_read(
   indices_clean, 
   store = here::here("preproc/_targets")
 ) |>
-  semi_join(
+  inner_join(
     filter(ind_filt, check_result %in% c("target", "target-low")) |> 
-      add_row(game_name = "瑞文高级推理", index_name = "nc_test"),
+      select(game_name, index_name, reversed) |> 
+      add_row(
+        game_name = "瑞文高级推理", 
+        index_name = "nc_test",
+        reversed = FALSE
+      ),
     by = c("game_name", "index_name")
-  )
+  ) |> 
+  mutate(test = if_else(reversed, -test, test))
 ```
 
 A basic principle choosing tasks for measuring training transfer effect is based on the correlations between the chosen tasks and the target tasks. Two types of target tasks are now selected: 
@@ -245,4 +251,39 @@ indices_clean |>
   format_dt()
 ```
 
+# Cognition Network
 
+Another task is to find the core tasks for the cognition. A direct method is to find the task that has the largest sum of correlations with all other tasks. It is so-called strength of nodes in network.
+
+## Strength for each task node
+
+```{r}
+#| fig-width: 10
+#| fig-height: 6
+library(tidygraph)
+graph <- indices_clean |> 
+  pivot_wider_indices() |> 
+  select(-user_id) |> 
+  correlate() |> 
+  stretch(na.rm = TRUE, remove.dups = TRUE) |> 
+  filter(r > 0.15) |> 
+  tidygraph::as_tbl_graph(directed = FALSE)
+strengths <- graph |> 
+  activate(nodes) |> 
+  mutate(strength = centrality_degree(weights = r)) |> 
+  as_tibble() |> 
+  arrange(desc(strength))
+strengths |> 
+  mutate(strength = digits(strength, 1)) |> 
+  formattable(
+    list(strength = color_text("green", "red"))
+  ) |> 
+  as.datatable()
+strengths |> 
+  ggplot(aes(fct_reorder(name, strength, .desc = TRUE), strength)) +
+  geom_bar(stat = "identity") +
+  scale_y_continuous(expand = c(0, 0)) +
+  labs(x = "Task Name", y = "Strength (Weighted Degree)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```

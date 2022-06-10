@@ -222,5 +222,19 @@
     "title": "Prepare Tasks for Cognitive Training Project",
     "section": "Average of these two tasks",
     "text": "Average of these two tasks\n\n\nCode\nmean_scores <- indices_clean |> \n  filter(\n    game_name_abbr == \"NVR\" |\n      (game_name_abbr == \"RAPM\" & index_name == \"nc_test\")\n  ) |> \n  pivot_wider(\n    id_cols = user_id,\n    names_from = game_name_abbr,\n    values_from = test\n  ) |> \n  mutate(\n    across(c(NVR, RAPM), ~ scale(.)[, 1]),\n    score_avg = map2_dbl(NVR, RAPM, ~ (.x + .y) / 2)\n  )\nindices_clean |> \n  filter(!game_name_abbr %in% c(\"NVR\", \"RAPM\")) |> \n  inner_join(mean_scores, by = \"user_id\") |> \n  group_by(game_name, index_name) |> \n  summarise(\n    n = sum(!is.na(test) & !is.na(score_avg)),\n    r = cor(test, score_avg, use = \"complete\"),\n    .groups = \"drop\"\n  ) |> \n  filter(n > 100) |> \n  mutate(abs_r = abs(r)) |> \n  arrange(desc(abs_r)) |> \n  left_join(\n    reliability_test_retest |> \n      select(game_name, index_name, icc = icc_no_outlier),\n    by = c(\"game_name\", \"index_name\")\n  ) |> \n  format_dt()"
+  },
+  {
+    "objectID": "posts/prepare-training/index.html#strength-for-each-task",
+    "href": "posts/prepare-training/index.html#strength-for-each-task",
+    "title": "Prepare Tasks for Cognitive Training Project",
+    "section": "Strength for each task",
+    "text": "Strength for each task\n\n\nCode\nlibrary(tidygraph)\ngraph <- indices_clean |> \n  pivot_wider_indices() |> \n  select(-user_id) |> \n  correlate() |> \n  stretch(na.rm = TRUE, remove.dups = TRUE) |> \n  filter(r > 0.15) |> \n  tidygraph::as_tbl_graph(directed = FALSE)\nstrengths <- graph |> \n  activate(nodes) |> \n  mutate(strength = centrality_degree(weights = r)) |> \n  as_tibble() |> \n  arrange(desc(strength))\nstrengths |> \n  mutate(strength = digits(strength, 1)) |> \n  formattable(\n    list(strength = color_text(\"green\", \"red\"))\n  ) |> \n  as.datatable()\n\n\n\n\n\n\n\nCode\nstrengths |> \n  ggplot(aes(fct_reorder(name, strength, .desc = TRUE), strength)) +\n  geom_bar(stat = \"identity\") +\n  scale_y_continuous(expand = c(0, 0)) +\n  labs(x = \"Task Name\", y = \"Strength (Weighted Degree)\") +\n  theme_minimal() +\n  theme(axis.text.x = element_text(angle = 45, hjust = 1))"
+  },
+  {
+    "objectID": "posts/prepare-training/index.html#strength-for-each-task-node",
+    "href": "posts/prepare-training/index.html#strength-for-each-task-node",
+    "title": "Prepare Tasks for Cognitive Training Project",
+    "section": "Strength for each task node",
+    "text": "Strength for each task node\n\n\nCode\nlibrary(tidygraph)\ngraph <- indices_clean |> \n  pivot_wider_indices() |> \n  select(-user_id) |> \n  correlate() |> \n  stretch(na.rm = TRUE, remove.dups = TRUE) |> \n  filter(r > 0.15) |> \n  tidygraph::as_tbl_graph(directed = FALSE)\nstrengths <- graph |> \n  activate(nodes) |> \n  mutate(strength = centrality_degree(weights = r)) |> \n  as_tibble() |> \n  arrange(desc(strength))\nstrengths |> \n  mutate(strength = digits(strength, 1)) |> \n  formattable(\n    list(strength = color_text(\"green\", \"red\"))\n  ) |> \n  as.datatable()\n\n\n\n\n\n\n\nCode\nstrengths |> \n  ggplot(aes(fct_reorder(name, strength, .desc = TRUE), strength)) +\n  geom_bar(stat = \"identity\") +\n  scale_y_continuous(expand = c(0, 0)) +\n  labs(x = \"Task Name\", y = \"Strength (Weighted Degree)\") +\n  theme_minimal() +\n  theme(axis.text.x = element_text(angle = 45, hjust = 1))"
   }
 ]
