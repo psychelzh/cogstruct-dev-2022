@@ -1,11 +1,12 @@
 ---
 title: "Prepare Tasks for Cognitive Training Project"
-author: "Liang Zhang"
+author: ["Liang Zhang", "Yifei Cao"]
 date: "2022-06-08"
 draft: false
 format: 
   html:
     code-fold: true
+    toc: true
 execute: 
   warning: false
 ---
@@ -18,15 +19,19 @@ requireNamespace("bit64")
 ```
 
 ```{r}
-pivot_wider_indices <- function(data) {
+pivot_wider_indices <- function(data, always_suffix = FALSE) {
   data |>
     add_count(user_id, game_name) |>
     mutate(
-      game_index = if_else(
-        n == 1,
-        game_name,
+      game_index = if (always_suffix) {
         str_c(game_name, index_name, sep = "-")
-      )
+      } else {
+        if_else(
+          n == 1,
+          game_name,
+          str_c(game_name, index_name, sep = "-")
+        )
+      }
     ) |>
     pivot_wider(
       id_cols = user_id,
@@ -68,7 +73,7 @@ indices_clean <- targets::tar_read(
   store = here::here("preproc/_targets")
 ) |>
   inner_join(
-    filter(ind_filt, check_result %in% c("target", "target-low")) |> 
+    filter(ind_filt, check_result == "target") |> 
       select(game_name, index_name, reversed) |> 
       add_row(
         game_name = "瑞文高级推理", 
@@ -287,3 +292,100 @@ strengths |>
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
+# Additional Analysis
+
+```{r}
+cog_data <- indices_clean |> 
+  pivot_wider_indices(always_suffix = TRUE) |> 
+  select(-user_id)
+```
+
+## Clustering tasks
+
+Try to cluster tasks into three clusters, and select tasks from the clusters.
+
+```{r}
+suppressPackageStartupMessages(library(dendextend))
+clust <- cog_data |> 
+  cor(use = "pairwise") |> 
+  smacof::sim2diss(to.dist = TRUE) |> 
+  hclust()
+# dend <- as.dendrogram(clust)
+dend_k <- find_k(clust)
+plot(dend_k)
+dend <- clust |> 
+  color_branches(k = 3) |> 
+  set("labels_cex", 0.4)
+plot(dend)
+rect.dendrogram(dend, k = 3, border = 8)
+```
+
+## Factor Analysis
+
+使用探索性因素分析的思路对于任务选取进行量化的定义。对于控制组、训练组的训练任务，以及近迁移、远迁移测试任务，我们的思路是：（1）训练组任务应与近迁移任务、远迁移任务拥有共同成分（Domain-general），而控制组训练任务与迁移任务没有共同成分；（2）训练组任务应与近迁移任务在Bi-factor模型中拥有共同的任务特殊性成分（Domain-specific）；（3）训练组任务应与远迁移任务在Bi-factor模型中处于不同的任务特殊性成分中。
+
+### Step 1: finding general factor
+
+在第一步中，我们对认知测试包含的所有任务具有代表性的指标进行探索性因素分析，并将factor数设置为1，意味着我们筛选出具有至少1个共同成分的任务作为训练组和迁移任务的备选。无法找出共同成分的任务，我们设置为控制组训练任务（factor的载荷低于0.3）。
+
+```{r}
+fit <- psych::fa(cog_data)
+g_loadings <- fit$loadings |> 
+  unclass() |> 
+  as_tibble(rownames = "game_index")
+```
+
+基于此规则，我们得到不与其他任务具有共同general成分的任务如下。这些任务可以用作控制组训练任务。因为这些任务与其他任务并不能找到共同的general factor，如果符合预期，那么控制组的训练并不会对其他任务产生影响。
+
+```{r}
+g_loadings |> 
+  filter(abs(MR1) < 0.3) |> 
+  mutate(MR1 = digits(MR1, 2)) |> 
+  formattable() |> 
+  as.datatable(
+    options = list(pageLength = 15)
+  )
+```
+
+### Step 2: Bifactor model for domain-specific
+
+下面，将筛选出的具有共同成分的任务使用Bi-factor模型，寻找domain-specific的因子。
+
+```{r}
+g_indices <- g_loadings |> 
+  filter(abs(MR1) > 0.3) |> 
+  pull(game_index)
+cog_data_g <- cog_data |> 
+  select(all_of(g_indices))
+factor_test <- psych::nfactors(cog_data_g)
+```
+
+经检验，这些任务包含4到6个domain-specific因子。首先检验4个specific因子的模型：
+
+```{r}
+#| fig-width: 8
+#| fig-height: 15
+fit_bifac <- psych::omega(cog_data_g, 4, plot = FALSE)
+psych::omega.diagram(fit_bifac)
+```
+
+其次检验5个specific因子的模型：
+
+```{r}
+#| fig-width: 8
+#| fig-height: 15
+fit_bifac <- psych::omega(cog_data_g, 5, plot = FALSE)
+psych::omega.diagram(fit_bifac)
+```
+
+最后为6个因子的模型：
+
+```{r}
+#| fig-width: 8
+#| fig-height: 15
+fit_bifac <- psych::omega(cog_data_g, 6, plot = FALSE)
+psych::omega.diagram(fit_bifac)
+```
+
+按照我们的思路，训练组的训练任务可从bi-factor模型中的specific因子包含的任务中选取，近迁移任务可以选择为同一specific因子内部的任务，而远迁移任务可以选定为属于不同specific因子的任务。这样选定的原理是：（1）近迁移任务与训练任务既有domain-general factor的共享，也有domain-specific因子的共享；（2）而远迁移任务与训练任务只存在domain-general因子的重叠，而使用不同的domain-specific因子。*其中部分任务会出现共载荷现象，将不选择这些任务。*

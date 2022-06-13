@@ -11,7 +11,7 @@
     "href": "index.html",
     "title": "Cognitive Structure Project",
     "section": "",
-    "text": "Jun 8, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nstructure\n\n\ncognition\n\n\nmeta-analysis\n\n\n\n\n\n\n\n\n\n\n\nMay 10, 2022\n\n\nYifei Cao, Liang Zhang\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nstructure\n\n\nwm\n\n\n\n\n\n\n\n\n\n\n\nMay 9, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ndata-check\n\n\n\n\n\n\n\n\n\n\n\nMay 7, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\nNo matching items"
+    "text": "Jun 8, 2022\n\n\nLiang Zhang, Yifei Cao\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nstructure\n\n\ncognition\n\n\nmeta-analysis\n\n\n\n\n\n\n\n\n\n\n\nMay 10, 2022\n\n\nYifei Cao, Liang Zhang\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nstructure\n\n\nwm\n\n\n\n\n\n\n\n\n\n\n\nMay 9, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ndata-check\n\n\n\n\n\n\n\n\n\n\n\nMay 7, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/check-raw-data/index.html",
@@ -236,5 +236,26 @@
     "title": "Prepare Tasks for Cognitive Training Project",
     "section": "Strength for each task node",
     "text": "Strength for each task node\n\n\nCode\nlibrary(tidygraph)\ngraph <- indices_clean |> \n  pivot_wider_indices() |> \n  select(-user_id) |> \n  correlate() |> \n  stretch(na.rm = TRUE, remove.dups = TRUE) |> \n  filter(r > 0.15) |> \n  tidygraph::as_tbl_graph(directed = FALSE)\nstrengths <- graph |> \n  activate(nodes) |> \n  mutate(strength = centrality_degree(weights = r)) |> \n  as_tibble() |> \n  arrange(desc(strength))\nstrengths |> \n  mutate(strength = digits(strength, 1)) |> \n  formattable(\n    list(strength = color_text(\"green\", \"red\"))\n  ) |> \n  as.datatable()\n\n\n\n\n\n\n\nCode\nstrengths |> \n  ggplot(aes(fct_reorder(name, strength, .desc = TRUE), strength)) +\n  geom_bar(stat = \"identity\") +\n  scale_y_continuous(expand = c(0, 0)) +\n  labs(x = \"Task Name\", y = \"Strength (Weighted Degree)\") +\n  theme_minimal() +\n  theme(axis.text.x = element_text(angle = 45, hjust = 1))"
+  },
+  {
+    "objectID": "posts/prepare-training/index.html#clustering-tasks",
+    "href": "posts/prepare-training/index.html#clustering-tasks",
+    "title": "Prepare Tasks for Cognitive Training Project",
+    "section": "Clustering tasks",
+    "text": "Clustering tasks\nTry to cluster tasks into three clusters, and select tasks from the clusters.\n\n\nCode\nsuppressPackageStartupMessages(library(dendextend))\nclust <- cog_data |> \n  cor(use = \"pairwise\") |> \n  smacof::sim2diss(to.dist = TRUE) |> \n  hclust()\n# dend <- as.dendrogram(clust)\ndend_k <- find_k(clust)\nplot(dend_k)\n\n\n\n\n\nCode\ndend <- clust |> \n  color_branches(k = 3) |> \n  set(\"labels_cex\", 0.4)\nplot(dend)\nrect.dendrogram(dend, k = 3, border = 8)"
+  },
+  {
+    "objectID": "posts/prepare-training/index.html#factor-analysis",
+    "href": "posts/prepare-training/index.html#factor-analysis",
+    "title": "Prepare Tasks for Cognitive Training Project",
+    "section": "Factor Analysis",
+    "text": "Factor Analysis\n使用探索性因素分析的思路对于任务选取进行量化的定义。对于控制组、训练组的训练任务，以及近迁移、远迁移测试任务，我们的思路是：（1）训练组任务应与近迁移任务、远迁移任务拥有共同成分（Domain-general），而控制组训练任务与迁移任务没有共同成分；（2）训练组任务应与近迁移任务在Bi-factor模型中拥有共同的任务特殊性成分（Domain-specific）；（3）训练组任务应与远迁移任务在Bi-factor模型中处于不同的任务特殊性成分中。\n\nStep 1: finding general factor\n在第一步中，我们对认知测试包含的所有任务具有代表性的指标进行探索性因素分析，并将factor数设置为1，意味着我们筛选出具有至少1个共同成分的任务作为训练组和迁移任务的备选。无法找出共同成分的任务，我们设置为控制组训练任务（factor的载荷低于0.3）。\n\n\nCode\nfit <- psych::fa(cog_data)\ng_loadings <- fit$loadings |> \n  unclass() |> \n  as_tibble(rownames = \"game_index\")\n\n\n基于此规则，我们得到不与其他任务具有共同general成分的任务如下。这些任务可以用作控制组训练任务。因为这些任务与其他任务并不能找到共同的general factor，如果符合预期，那么控制组的训练并不会对其他任务产生影响。\n\n\nCode\ng_loadings |> \n  filter(abs(MR1) < 0.3) |> \n  mutate(MR1 = digits(MR1, 2)) |> \n  formattable() |> \n  as.datatable(\n    options = list(pageLength = 15)\n  )\n\n\n\n\n\n\n\n\n\nStep 2: Bifactor model for domain-specific\n下面，将筛选出的具有共同成分的任务使用Bi-factor模型，寻找domain-specific的因子。\n\n\nCode\ng_indices <- g_loadings |> \n  filter(abs(MR1) > 0.3) |> \n  pull(game_index)\ncog_data_g <- cog_data |> \n  select(all_of(g_indices))\nfactor_test <- psych::nfactors(cog_data_g)\n\n\n\n\n\n经检验，这些任务包含4到6个domain-specific因子。首先检验4个specific因子的模型：\n\n\nCode\nfit_bifac <- psych::omega(cog_data_g, 4, plot = FALSE)\npsych::omega.diagram(fit_bifac)\n\n\n\n\n\n其次检验5个specific因子的模型：\n\n\nCode\nfit_bifac <- psych::omega(cog_data_g, 5, plot = FALSE)\npsych::omega.diagram(fit_bifac)\n\n\n\n\n\n最后为6个因子的模型：\n\n\nCode\nfit_bifac <- psych::omega(cog_data_g, 6, plot = FALSE)\npsych::omega.diagram(fit_bifac)\n\n\n\n\n\n按照我们的思路，训练组的训练任务可从bi-factor模型中的specific因子包含的任务中选取，近迁移任务可以选择为同一specific因子内部的任务，而远迁移任务可以选定为属于不同specific因子的任务。这样选定的原理是：（1）近迁移任务与训练任务既有domain-general factor的共享，也有domain-specific因子的共享；（2）而远迁移任务与训练任务只存在domain-general因子的重叠，而使用不同的domain-specific因子。其中部分任务会出现共载荷现象，将不选择这些任务。"
+  },
+  {
+    "objectID": "posts/prepare-training/index.html#step-2-bifactor-model-for-domain-specific",
+    "href": "posts/prepare-training/index.html#step-2-bifactor-model-for-domain-specific",
+    "title": "Prepare Tasks for Cognitive Training Project",
+    "section": "Step 2: Bifactor model for domain-specific",
+    "text": "Step 2: Bifactor model for domain-specific\n下面，将筛选出的具有共同成分的任务使用Bi-factor模型，寻找domain-specific的因子。\n\n\nCode\ng_indices <- g_loadings |> \n  filter(abs(MR1) > 0.3) |> \n  pull(game_index)\ncog_data_g <- cog_data |> \n  select(all_of(g_indices))\nfactor_test <- psych::nfactors(cog_data_g)\n\n\n\n\n\n经检验，这些任务包含4到6个domain-specific因子。首先检验4个specific因子的模型：\n\n\nCode\nfit_bifac <- psych::omega(cog_data_g, 4, plot = FALSE)\npsych::omega.diagram(fit_bifac)\n\n\n\n\n\n其次检验5个specific因子的模型：\n\n\nCode\nfit_bifac <- psych::omega(cog_data_g, 5, plot = FALSE)\npsych::omega.diagram(fit_bifac)\n\n\n\n\n\n最后为6个因子的模型：\n\n\nCode\nfit_bifac <- psych::omega(cog_data_g, 6, plot = FALSE)\npsych::omega.diagram(fit_bifac)\n\n\n\n\n\n按照我们的思路，训练组的训练任务可从bi-factor模型中的specific因子包含的任务中选取，近迁移任务可以选择为同一specific因子内部的任务，而远迁移任务可以选定为属于不同specific因子的任务。这样选定的原理是：（1）近迁移任务与训练任务既有domain-general factor的共享，也有domain-specific因子的共享；（2）而远迁移任务与训练任务只存在domain-general因子的重叠，而使用不同的domain-specific因子。"
   }
 ]
