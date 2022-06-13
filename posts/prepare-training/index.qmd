@@ -297,7 +297,7 @@ strengths |>
 
 ```{r}
 cog_data <- indices_clean |> 
-  pivot_wider_indices(always_suffix = TRUE) |> 
+  pivot_wider_indices() |> 
   select(-user_id)
 ```
 
@@ -315,10 +315,10 @@ clust <- cog_data |>
 dend_k <- find_k(clust)
 plot(dend_k)
 dend <- clust |> 
-  color_branches(k = 3) |> 
+  color_branches(k = dend_k$nc) |> 
   set("labels_cex", 0.4)
 plot(dend)
-rect.dendrogram(dend, k = 3, border = 8)
+rect.dendrogram(dend, k = dend_k$nc, border = 8)
 ```
 
 ## Factor Analysis
@@ -340,7 +340,7 @@ g_loadings <- fit$loadings |>
 
 ```{r}
 g_loadings |> 
-  filter(abs(MR1) < 0.3) |> 
+  filter(abs(MR1) < 0.4) |> 
   mutate(MR1 = digits(MR1, 2)) |> 
   formattable() |> 
   as.datatable(
@@ -354,37 +354,19 @@ g_loadings |>
 
 ```{r}
 g_indices <- g_loadings |> 
-  filter(abs(MR1) > 0.3) |> 
+  filter(abs(MR1) > 0.4) |> 
   pull(game_index)
 cog_data_g <- cog_data |> 
   select(all_of(g_indices))
 factor_test <- psych::nfactors(cog_data_g)
 ```
 
-经检验，这些任务包含4到6个domain-specific因子。首先检验4个specific因子的模型：
-
-```{r}
-#| fig-width: 8
-#| fig-height: 15
-fit_bifac <- psych::omega(cog_data_g, 4, plot = FALSE)
-psych::omega.diagram(fit_bifac)
-```
-
-其次检验5个specific因子的模型：
+检验5个specific因子的模型：
 
 ```{r}
 #| fig-width: 8
 #| fig-height: 15
 fit_bifac <- psych::omega(cog_data_g, 5, plot = FALSE)
-psych::omega.diagram(fit_bifac)
-```
-
-最后为6个因子的模型：
-
-```{r}
-#| fig-width: 8
-#| fig-height: 15
-fit_bifac <- psych::omega(cog_data_g, 6, plot = FALSE)
 psych::omega.diagram(fit_bifac)
 ```
 
