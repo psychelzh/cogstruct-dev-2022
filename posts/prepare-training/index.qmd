@@ -327,7 +327,7 @@ rect.dendrogram(dend, k = dend_k$nc, border = 8)
 
 ### Step 1: finding general factor
 
-在第一步中，我们对认知测试包含的所有任务具有代表性的指标进行探索性因素分析，并将factor数设置为1，意味着我们筛选出具有至少1个共同成分的任务作为训练组和迁移任务的备选。无法找出共同成分的任务，我们设置为控制组训练任务（factor的载荷低于0.3）。
+在第一步中，我们对认知测试包含的所有任务具有代表性的指标进行探索性因素分析，并将factor数设置为1，意味着我们筛选出具有至少1个共同成分的任务作为训练组和迁移任务的备选。无法找出共同成分的任务，我们设置为控制组训练任务（factor的载荷低于0.4）。
 
 ```{r}
 fit <- psych::fa(cog_data)
@@ -362,6 +362,17 @@ factor_test <- psych::nfactors(cog_data_g)
 ```
 
 检验5个specific因子的模型：
+
+* **Correlated factor model**
+
+```{r}
+#| fig-width: 8
+#| fig-height: 12
+fit_fa <- psych::fa(cog_data_g, 4)
+psych::fa.diagram(fit_fa)
+```
+
+* **Bi-factor model**
 
 ```{r}
 #| fig-width: 8
