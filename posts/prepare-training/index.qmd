@@ -365,8 +365,8 @@ factor_test <- psych::nfactors(cog_data_g)
 
 ```{r}
 #| fig-width: 8
-#| fig-height: 15
-fit_bifac <- psych::omega(cog_data_g, 5, plot = FALSE)
+#| fig-height: 12
+fit_bifac <- psych::omega(cog_data_g, 4, plot = FALSE)
 psych::omega.diagram(fit_bifac)
 ```
 
