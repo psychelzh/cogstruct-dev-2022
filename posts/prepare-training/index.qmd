@@ -82,19 +82,22 @@ indices_clean <- targets::tar_read(
       ),
     by = c("game_name", "index_name")
   ) |> 
-  mutate(test = if_else(reversed, -test, test))
+  mutate(test = if_else(reversed, -test, test)) |> 
+  group_by(game_name, index_name) |> 
+  filter(!test %in% boxplot.stats(test)$out) |> 
+  ungroup()
 ```
 
-A basic principle choosing tasks for measuring training transfer effect is based on the correlations between the chosen tasks and the target tasks. Two types of target tasks are now selected: 
+A basic principle choosing tasks for measuring training transfer effect is based on the correlations between the chosen tasks and the target tasks. Two types of target tasks are now selected:
 
-* Reasoning tasks: currently only two, namely, Raven's Advanced Progressive Matrices (RAPM) and Non-verbal Reasoning Task.
-* Visuo-spatial working memory tasks.
+-   Reasoning tasks: currently only two, namely, Raven's Advanced Progressive Matrices (RAPM) and Non-verbal Reasoning Task.
+-   Visuo-spatial working memory tasks.
 
 Here the correlations with these two types of tasks are calculated as follows.
 
 # Correlation with Reasoning tasks
 
-## RAPM 
+## RAPM
 
 ```{r}
 indices_clean |> 
@@ -225,7 +228,6 @@ semPlot::semPaths(
 lavaan::summary(fitted, fit.measures = TRUE, estimates = FALSE)
 ```
 
-
 ## Common Factor
 
 ```{r}
@@ -297,7 +299,7 @@ strengths |>
 
 ```{r}
 cog_data <- indices_clean |> 
-  pivot_wider_indices() |> 
+  pivot_wider_indices(always_suffix = TRUE) |> 
   select(-user_id)
 ```
 
@@ -363,7 +365,7 @@ factor_test <- psych::nfactors(cog_data_g)
 
 检验5个specific因子的模型：
 
-* **Correlated factor model**
+-   **Correlated factor model**
 
 ```{r}
 #| fig-width: 8
@@ -372,7 +374,7 @@ fit_fa <- psych::fa(cog_data_g, 4)
 psych::fa.diagram(fit_fa)
 ```
 
-* **Bi-factor model**
+-   **Bi-factor model**
 
 ```{r}
 #| fig-width: 8
@@ -382,3 +384,85 @@ psych::omega.diagram(fit_bifac)
 ```
 
 按照我们的思路，训练组的训练任务可从bi-factor模型中的specific因子包含的任务中选取，近迁移任务可以选择为同一specific因子内部的任务，而远迁移任务可以选定为属于不同specific因子的任务。这样选定的原理是：（1）近迁移任务与训练任务既有domain-general factor的共享，也有domain-specific因子的共享；（2）而远迁移任务与训练任务只存在domain-general因子的重叠，而使用不同的domain-specific因子。*其中部分任务会出现共载荷现象，将不选择这些任务。*
+
+# Analysis for candidate tasks
+
+Selected tasks:
+
+-   Control training tasks:
+    -   舒尔特方格（中级）
+    -   方向临摹
+    -   一心二用PRO
+    -   连点成画PRO
+    -   超级秒表PRO
+-   Experimental training tasks
+    -   密码箱
+    -   幸运小球
+    -   打靶场
+    -   蝴蝶照相机
+-   Near Transfer
+    -   顺背数PRO
+    -   倒背数PRO
+-   Far Transfer
+    -   文字卡片
+    -   美术卡片
+    -   图形推理
+    -   数字推理
+
+```{r}
+candidates <- readxl::read_excel("candidates.xlsx")
+indices_selected <- indices_clean |> 
+  semi_join(candidates, by = "game_name") |> 
+  pivot_wider_indices(always_suffix = TRUE) |> 
+  select(-user_id)
+```
+
+## Correlation Matrix
+
+```{r}
+#| fig-width: 10
+#| fig-height: 8
+correlate(indices_selected, quiet = TRUE) |> 
+  rearrange(method = "HC") |>
+  stretch() |> 
+  mutate(across(c(x, y), as_factor)) |>
+  ggplot(aes(x, y)) +
+  geom_tile(aes(fill = r)) +
+  scico::scale_fill_scico(palette = "bam", midpoint = 0, direction = -1) +
+  coord_fixed() +
+  theme_minimal(base_size = 18) +
+  labs(x = "", y = "", fill = "Pearson's", color = "") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Multidimensional Scaling
+
+```{r}
+mds <- indices_selected |> 
+  cor(use = "pairwise") |> 
+  smacof::sim2diss(to.dist = TRUE) |> 
+  smacof::mds(ndim = 2, type = "mspline")
+plot(mds)
+```
+
+## Exploratory Factor Analysis
+
+### Traditional
+
+```{r}
+nfactors_test <- psych::nfactors(indices_selected)
+```
+
+-   Correlated latent factors
+
+```{r}
+fit <- psych::fa(indices_selected, 3)
+psych::fa.diagram(fit)
+```
+
+-   Bifactor model
+
+```{r}
+fit_bifac <- psych::omega(indices_selected, 3, plot = FALSE)
+psych::omega.diagram(fit_bifac)
+```
