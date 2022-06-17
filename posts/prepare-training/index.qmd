@@ -396,24 +396,24 @@ Selected tasks:
     -   连点成画PRO
     -   超级秒表PRO
 -   Experimental training tasks
-    -   密码箱
-    -   幸运小球
+    -   生肖魔法书（时空相机）
+    -   机械城堡（宇宙黑洞）
     -   打靶场
     -   蝴蝶照相机
 -   Near Transfer
-    -   顺背数PRO
-    -   倒背数PRO
+    -   幸运小球
+    -   格子卡片
 -   Far Transfer
-    -   文字卡片
-    -   美术卡片
-    -   图形推理
+    -   数字卡片
+    -   速算师
+    -   瑞文标准推理+瑞文高级推理
     -   数字推理
 
 ```{r}
 candidates <- readxl::read_excel("candidates.xlsx")
 indices_selected <- indices_clean |> 
   semi_join(candidates, by = "game_name") |> 
-  pivot_wider_indices(always_suffix = TRUE) |> 
+  pivot_wider_indices(always_suffix = FALSE) |> 
   select(-user_id)
 ```
 
@@ -445,24 +445,103 @@ mds <- indices_selected |>
 plot(mds)
 ```
 
-## Exploratory Factor Analysis
-
-### Traditional
+## One General Factor Loading Check
 
 ```{r}
-nfactors_test <- psych::nfactors(indices_selected)
+fit <- psych::fa(indices_selected)
+fit$loadings |> 
+  unclass() |> 
+  as_tibble(rownames = "game_index") |> 
+  mutate(MR1 = digits(MR1, 2)) |> 
+  formattable() |> 
+  as.datatable(
+    options = list(pageLength = 15)
+  )
 ```
 
--   Correlated latent factors
+可以看出来，一心二用的载荷比预计的高，而幸运小球的载荷比预计的小。控制组训练确定为：
+
+* 超级秒表
+* 连点成画
+* 舒尔特方格
+* 方向临摹
+
+## EFA for remaining tasks
 
 ```{r}
-fit <- psych::fa(indices_selected, 3)
-psych::fa.diagram(fit)
+indices_train <- indices_selected |> 
+  select(
+    !starts_with(
+      c("超级秒表", "连点成画", "舒尔特方格", 
+        "方向临摹", "一心二用")
+    )
+  )
 ```
 
--   Bifactor model
+```{r}
+nfactors_test <- psych::nfactors(indices_train)
+```
 
 ```{r}
-fit_bifac <- psych::omega(indices_selected, 3, plot = FALSE)
+#| fig-width: 8
+#| fig-height: 10
+fit_fa <- psych::fa(indices_train, 2)
+psych::fa.diagram(fit_fa)
+```
+
+```{r}
+#| fig-width: 8
+#| fig-height: 10
+fit_bifac <- psych::omega(indices_train, 2, plot = FALSE)
 psych::omega.diagram(fit_bifac)
 ```
+
+## Correlation with Latent Score of Trained Tasks
+
+```{r}
+fitted <- lavaan::cfa(
+  "VS_WM =~ 宇宙黑洞 + 蝴蝶照相机 + 打靶场",
+  indices_train, std.lv = TRUE, std.ov = TRUE,
+  estimator = "MLR", missing = "ml"
+)
+semPlot::semPaths(
+  fitted, what = "std", edge.color = "black", layout = "tree2",
+  sizeMan = 6, sizeLat = 8, edge.label.cex = 0.6, intercepts = FALSE,
+  nCharEdges = 5, esize = 1, trans = 1, nCharNodes = 0,
+  bifactor = "Common"
+)
+lavaan::summary(fitted, fit.measures = TRUE, estimates = FALSE)
+```
+
+```{r}
+scores_latent <- bind_cols(
+  indices_clean |> 
+    semi_join(candidates, by = "game_name") |> 
+    pivot_wider_indices() |> 
+    select(user_id),
+  lavaan::predict(fitted) |> 
+    unclass() |> 
+    as_tibble()
+)
+indices_clean |> 
+  semi_join(candidates, by = "game_name") |> 
+  inner_join(
+    scores_latent,
+    by = "user_id"
+  ) |> 
+  group_by(game_name, index_name) |> 
+  summarise(
+    n = sum(!is.na(test) & !is.na(VS_WM)),
+    r = cor(test, VS_WM, use = "complete"),
+    .groups = "drop"
+  ) |> 
+  mutate(abs_r = abs(r)) |> 
+  arrange(desc(abs_r)) |> 
+  left_join(
+    reliability_test_retest |> 
+      select(game_name, index_name, icc = icc_no_outlier),
+    by = c("game_name", "index_name")
+  ) |> 
+  format_dt()
+```
+
