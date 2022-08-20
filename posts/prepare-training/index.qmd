@@ -387,18 +387,26 @@ psych::omega.diagram(fit_bifac)
 
 # Analysis for candidate tasks
 
+```{r}
+candidates <- readxl::read_excel("candidates.xlsx")
+indices_selected <- indices_clean |> 
+  semi_join(candidates, by = "game_name") |> 
+  pivot_wider_indices(always_suffix = FALSE) |> 
+  select(-user_id)
+```
+
 Selected tasks:
 
 -   Control training tasks:
     -   舒尔特方格（中级）
     -   方向临摹
-    -   一心二用PRO
-    -   连点成画PRO
     -   超级秒表PRO
+    -   节奏感知
+    -   时间顺序判断
+    -   
 -   Experimental training tasks
     -   生肖魔法书（时空相机）
     -   机械城堡（宇宙黑洞）
-    -   打靶场
     -   蝴蝶照相机
 -   Near Transfer
     -   幸运小球
@@ -408,14 +416,6 @@ Selected tasks:
     -   速算师
     -   瑞文标准推理+瑞文高级推理
     -   数字推理
-
-```{r}
-candidates <- readxl::read_excel("candidates.xlsx")
-indices_selected <- indices_clean |> 
-  semi_join(candidates, by = "game_name") |> 
-  pivot_wider_indices(always_suffix = FALSE) |> 
-  select(-user_id)
-```
 
 ## Correlation Matrix
 
@@ -472,8 +472,9 @@ fit$loadings |>
 indices_train <- indices_selected |> 
   select(
     !starts_with(
-      c("超级秒表", "连点成画", "舒尔特方格", 
-        "方向临摹", "一心二用")
+      candidates |> 
+        filter(type == "train-ctrl") |> 
+        pull(game_name)
     )
   )
 ```
@@ -483,15 +484,11 @@ nfactors_test <- psych::nfactors(indices_train)
 ```
 
 ```{r}
-#| fig-width: 8
-#| fig-height: 10
 fit_fa <- psych::fa(indices_train, 2)
 psych::fa.diagram(fit_fa)
 ```
 
 ```{r}
-#| fig-width: 8
-#| fig-height: 10
 fit_bifac <- psych::omega(indices_train, 2, plot = FALSE)
 psych::omega.diagram(fit_bifac)
 ```
@@ -500,7 +497,7 @@ psych::omega.diagram(fit_bifac)
 
 ```{r}
 fitted <- lavaan::cfa(
-  "VS_WM =~ 宇宙黑洞 + 蝴蝶照相机 + 打靶场",
+  "VS_WM =~ 宇宙黑洞 + 蝴蝶照相机 + 位置记忆PRO",
   indices_train, std.lv = TRUE, std.ov = TRUE,
   estimator = "MLR", missing = "ml"
 )
