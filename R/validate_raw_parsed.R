@@ -1,11 +1,9 @@
 #' Validate Raw Data
 #'
 #' This step will remove invalid data following these rules:
-#' \enumerate{
-#'   \item Only use the data from the correct version ([check_version()]).
-#'   \item Remove data of invalid device (keyboard required, but used mouse).
-#'   \item Special cases: some special updates before versioning online.
-#' }
+#' 1. Only use the data from the correct version ([check_version()]).
+#' 1. Remove data of invalid device (keyboard required, but used mouse).
+#' 1. Special cases: some special updates before versioning online.
 #'
 #' @param data_parsed Data with parsed raw data.
 #' @param games_req_kb Character vector contains names of the games requiring
