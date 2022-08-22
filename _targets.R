@@ -81,5 +81,6 @@ list(
   ),
   tar_target(indices_clean, clean_indices(indices)),
   tar_target(indices_clean_even, clean_indices(indices_even)),
-  tar_target(indices_clean_odd, clean_indices(indices_odd))
+  tar_target(indices_clean_odd, clean_indices(indices_odd)),
+  tarchetypes::tar_quarto(quarto_site, quiet = F)
 )

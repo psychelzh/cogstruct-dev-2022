@@ -11,6 +11,7 @@ format:
 categories: [structure, ef]
 execute:
   warning: false
+  showtext: true
 ---
 
 ```{r}
@@ -18,27 +19,26 @@ execute:
 library(tidyverse)
 library(corrr)
 library(BayesFM)
+library(showtext)
 ```
 
 ```{r}
 #| label: load-data
 #| cache: true
-targets::tar_load(users, store = here::here("preproc/_targets"))
-ind_filt <- readxl::read_excel(here::here("config/indices_filtering.xlsx"))
-dim_order <- c("attention", "multitask", "switching", "inhibition",
-               "reasoning", "complex span", "working memory", "short term memory",
-               "long term memory", "probability learning",
-               "speeded IP", "strategic IP",
-               "perception", "math", "language")
-indices_clean <- targets::tar_read(indices_final, store = here::here("preproc/_targets")) |>
-  full_join(ind_filt, by = c("game_name", "index_name")) |>
-  filter(
-    !is.na(check_result) & check_result != "target-stash",
-    grade != "20220303级",
-    !game_name %in% c("文字推理", "数字推理")
-  ) |>
+targets::tar_load(users)
+ind_filt <- readxl::read_excel("config/indices_filtering.xlsx")
+dim_order <- c(
+  "attention", "multitask", "switching", "inhibition",
+  "reasoning", "complex span", "working memory", "short term memory",
+  "long term memory", "probability learning",
+  "speeded IP", "strategic IP",
+  "perception", "math", "language"
+)
+indices_clean <- targets::tar_read(indices_clean) |>
+  full_join(ind_filt, by = c("game_name", "game_name_abbr", "index_name")) |>
+  filter(!is.na(check_result) & check_result != "target-stash") |>
   arrange(factor(dimension, dim_order)) |>
-  mutate(test = if_else(reversed, -test, test)) |>
+  mutate(test = if_else(reversed == "yes", -test, test)) |>
   group_by(game_name, index_name) |>
   mutate(test = if_else(test %in% boxplot.stats(test)$out, NA_real_, test)) |>
   ungroup()

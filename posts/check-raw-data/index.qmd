@@ -2,7 +2,7 @@
 title: "Check Raw Data"
 author: "Liang Zhang"
 date: "2022-05-07"
-draft: false
+draft: true
 format:
   html:
     code-fold: true
@@ -15,6 +15,7 @@ execute:
 #| label: setup
 #| include: false
 library(tidyverse)
+library(showtext)
 ```
 
 Here we check raw data from several special tasks. Especially check the factors influencing reliability, internal consistency of each task
@@ -26,10 +27,11 @@ Here we check raw data from several special tasks. Especially check the factors 
 #| fig-width: 15
 #| fig-height: 5
 #| cache: true
+#| showtext: true
 
-targets::tar_load(data_valid_FWSPro, store = here::here("preproc/_targets"))
-chrs_freq <- read_tsv("CharFreq.txt", skip = 5)
-chrs_used <- readxl::read_excel("过目不忘-汉字库.xlsx") |>
+targets::tar_load(data_valid_FWSPro)
+chrs_freq <- read_tsv("config/CharFreq.txt", skip = 5, show_col_types = F)
+chrs_used <- readxl::read_excel("config/过目不忘-汉字库（新）.xlsx") |>
   left_join(chrs_freq, by = "汉字")
 data_adj_acc <- data_valid_FWSPro |>
   unnest(raw_parsed) |>
@@ -81,17 +83,13 @@ data_adj_acc |>
   facet_wrap(~ stim_phon, scales = "free_x", nrow = 1) +
   labs(x = "", y = "", fill = "") +
   # scale_y_continuous(expand = c(0, 0)) +
-  ggthemes::theme_hc() +
-  theme(
-    axis.text.x = element_text(family = "SimHei"),
-    legend.text = element_text(family = "SimHei")
-  )
+  ggthemes::theme_hc()
 ```
 
 ## Schulte Grid (舒尔特方格)
 
 ```{r}
-targets::tar_load(data_valid_SchulteMed, store = here::here("preproc/_targets"))
+targets::tar_load(data_valid_SchulteMed)
 rt_by_resp <- data_valid_SchulteMed |>
   mutate(
     raw_parsed = map(
@@ -122,9 +120,8 @@ rt_by_resp |>
 
 ```{r}
 #| eval: false
-targets::tar_load(data_valid_DRA, store = here::here("preproc/_targets"))
-data_valid_DRA |>
-  filter(course_name == "清华大学认知实验D") |>
+targets::tar_load(data_valid_VRA)
+data_valid_VRA |>
   unnest(raw_parsed) |>
   mutate(item = as.numeric(as_factor(itemid))) |>
   # group_by(item) |>
@@ -137,78 +134,4 @@ data_valid_DRA |>
     values_from = acc
   ) |>
   select(-user_id)
-```
-
-## NeuroRacer (小狗回家)
-
-```{r}
-data_racer_new <- targets::tar_read(
-  data_valid_Racer, 
-  store = here::here("preproc/_targets")
-) |> 
-  tidyr::unnest(raw_parsed) |> 
-  dplyr::mutate(block = paste0("V", block)) |> 
-  dplyr::filter(block != "V0")
-data_racer_new |> 
-  dplyr::group_by(user_id, block) |> 
-  dplyr::summarise(
-    mean_score = sum(escortscore * trialdur) / sum(trialdur),
-    .groups = "drop"
-  ) |> 
-  tidyr::pivot_wider(
-    id_cols = user_id, 
-    names_from = block, 
-    values_from = mean_score
-  ) |> 
-  dplyr::select(-user_id) |> 
-  psych::alpha()
-data_racer_new |> 
-  dplyr::group_by(user_id, block) |> 
-  dplyr::group_modify(
-    ~ preproc.iquizoo::cpt(.x)
-  )|> 
-  dplyr::ungroup() |> 
-  tidyr::pivot_wider(
-    id_cols = user_id, 
-    names_from = block, 
-    values_from = dprime
-  ) |> 
-  dplyr::select(-user_id) |> 
-  psych::alpha()
-```
-
-```{r}
-data_racer_old <- targets::tar_read(
-  data_parsed_Racer, 
-  store = here::here("preproc/_targets")
-) |> 
-  dplyr::filter(game_version == "1.0.0") |> 
-  tidyr::unnest(raw_parsed) |> 
-  dplyr::mutate(block = paste0("V", block))
-data_racer_old |> 
-  dplyr::group_by(user_id, block) |> 
-  dplyr::summarise(
-    mean_score = sum(produr * trialdur) / sum(trialdur),
-    .groups = "drop"
-  ) |> 
-  tidyr::pivot_wider(
-    id_cols = user_id, 
-    names_from = block, 
-    values_from = mean_score
-  ) |> 
-  dplyr::select(-user_id) |> 
-  psych::alpha()
-data_racer_old |> 
-  dplyr::group_by(user_id, block) |> 
-  dplyr::group_modify(
-    ~ preproc.iquizoo::cpt(.x)
-  )|> 
-  dplyr::ungroup() |> 
-  tidyr::pivot_wider(
-    id_cols = user_id, 
-    names_from = block, 
-    values_from = dprime
-  ) |> 
-  dplyr::select(-user_id) |> 
-  psych::alpha()
 ```

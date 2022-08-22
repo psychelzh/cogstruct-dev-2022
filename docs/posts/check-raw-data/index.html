@@ -195,12 +195,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Here we check raw data from several special tasks. Especially check the factors influencing reliability, internal consistency of each task</p>
 <section id="forward-word-span-过目不忘" class="level2">
 <h2 class="anchored" data-anchor-id="forward-word-span-过目不忘">Forward Word Span (过目不忘)</h2>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-2_9b752102ac5454a2ac8cc881f93e336b">
+<div class="cell" data-showtext="true" data-hash="index_cache/html/unnamed-chunk-2_6ee3a89f914c6dc0aaefab6f356d08ce">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">::</span><span class="fu">tar_load</span>(data_valid_FWSPro, <span class="at">store =</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"preproc/_targets"</span>))</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>chrs_freq <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">"CharFreq.txt"</span>, <span class="at">skip =</span> <span class="dv">5</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>chrs_used <span class="ot">&lt;-</span> readxl<span class="sc">::</span><span class="fu">read_excel</span>(<span class="st">"过目不忘-汉字库.xlsx"</span>) <span class="sc">|&gt;</span></span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">::</span><span class="fu">tar_load</span>(data_valid_FWSPro)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>chrs_freq <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">"config/CharFreq.txt"</span>, <span class="at">skip =</span> <span class="dv">5</span>, <span class="at">show_col_types =</span> F)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>chrs_used <span class="ot">&lt;-</span> readxl<span class="sc">::</span><span class="fu">read_excel</span>(<span class="st">"config/过目不忘-汉字库（新）.xlsx"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(chrs_freq, <span class="at">by =</span> <span class="st">"汉字"</span>)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>data_adj_acc <span class="ot">&lt;-</span> data_valid_FWSPro <span class="sc">|&gt;</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(raw_parsed) <span class="sc">|&gt;</span></span>
@@ -252,11 +252,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> stim_phon, <span class="at">scales =</span> <span class="st">"free_x"</span>, <span class="at">nrow =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
 <span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">""</span>, <span class="at">y =</span> <span class="st">""</span>, <span class="at">fill =</span> <span class="st">""</span>) <span class="sc">+</span></span>
 <span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>  <span class="co"># scale_y_continuous(expand = c(0, 0)) +</span></span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>  ggthemes<span class="sc">::</span><span class="fu">theme_hc</span>() <span class="sc">+</span></span>
-<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"SimHei"</span>),</span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"SimHei"</span>)</span>
-<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>  ggthemes<span class="sc">::</span><span class="fu">theme_hc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -273,7 +269,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">::</span><span class="fu">tar_load</span>(data_valid_SchulteMed, <span class="at">store =</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"preproc/_targets"</span>))</span>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">::</span><span class="fu">tar_load</span>(data_valid_SchulteMed)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>rt_by_resp <span class="ot">&lt;-</span> data_valid_SchulteMed <span class="sc">|&gt;</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">raw_parsed =</span> <span class="fu">map</span>(</span>
@@ -309,225 +305,21 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">::</span><span class="fu">tar_load</span>(data_valid_DRA, <span class="at">store =</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"preproc/_targets"</span>))</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>data_valid_DRA <span class="sc">|&gt;</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(course_name <span class="sc">==</span> <span class="st">"清华大学认知实验D"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(raw_parsed) <span class="sc">|&gt;</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">item =</span> <span class="fu">as.numeric</span>(<span class="fu">as_factor</span>(itemid))) <span class="sc">|&gt;</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># group_by(item) |&gt;</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># filter(between(mean(acc == 1), 0.6, 0.9)) |&gt;</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ungroup() |&gt;</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(acc <span class="sc">!=</span> <span class="sc">-</span><span class="dv">1</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">id_cols =</span> user_id,</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> item,</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_from =</span> acc</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>user_id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">::</span><span class="fu">tar_load</span>(data_valid_VRA)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>data_valid_VRA <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(raw_parsed) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">item =</span> <span class="fu">as.numeric</span>(<span class="fu">as_factor</span>(itemid))) <span class="sc">|&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># group_by(item) |&gt;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># filter(between(mean(acc == 1), 0.6, 0.9)) |&gt;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ungroup() |&gt;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(acc <span class="sc">!=</span> <span class="sc">-</span><span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">id_cols =</span> user_id,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> item,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_from =</span> acc</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>user_id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-</div>
-</section>
-<section id="neuroracer-小狗回家" class="level2">
-<h2 class="anchored" data-anchor-id="neuroracer-小狗回家">NeuroRacer (小狗回家)</h2>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>data_racer_new <span class="ot">&lt;-</span> targets<span class="sc">::</span><span class="fu">tar_read</span>(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  data_valid_Racer, </span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">store =</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"preproc/_targets"</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">unnest</span>(raw_parsed) <span class="sc">|&gt;</span> </span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">block =</span> <span class="fu">paste0</span>(<span class="st">"V"</span>, block)) <span class="sc">|&gt;</span> </span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(block <span class="sc">!=</span> <span class="st">"V0"</span>)</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>data_racer_new <span class="sc">|&gt;</span> </span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(user_id, block) <span class="sc">|&gt;</span> </span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_score =</span> <span class="fu">sum</span>(escortscore <span class="sc">*</span> trialdur) <span class="sc">/</span> <span class="fu">sum</span>(trialdur),</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">id_cols =</span> user_id, </span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> block, </span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_from =</span> mean_score</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>user_id) <span class="sc">|&gt;</span> </span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  psych<span class="sc">::</span><span class="fu">alpha</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Reliability analysis   
-Call: psych::alpha(x = dplyr::select(tidyr::pivot_wider(dplyr::summarise(dplyr::group_by(data_racer_new, 
-    user_id, block), mean_score = sum(escortscore * trialdur)/sum(trialdur), 
-    .groups = "drop"), id_cols = user_id, names_from = block, 
-    values_from = mean_score), -user_id))
-
-  raw_alpha std.alpha G6(smc) average_r S/N   ase mean    sd median_r
-      0.85      0.85     0.8      0.66 5.7 0.045 0.84 0.043     0.62
-
-    95% confidence boundaries 
-         lower alpha upper
-Feldt     0.73  0.85  0.92
-Duhachek  0.76  0.85  0.94
-
- Reliability if an item is dropped:
-   raw_alpha std.alpha G6(smc) average_r S/N alpha se var.r med.r
-V2      0.75      0.76    0.61      0.61 3.2    0.084    NA  0.61
-V3      0.77      0.77    0.62      0.62 3.3    0.081    NA  0.62
-V1      0.84      0.85    0.73      0.73 5.5    0.054    NA  0.73
-
- Item statistics 
-    n raw.r std.r r.cor r.drop mean    sd
-V2 33  0.91  0.89  0.83   0.76 0.84 0.045
-V3 33  0.90  0.89  0.82   0.75 0.85 0.055
-V1 30  0.83  0.85  0.71   0.66 0.83 0.045</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>data_racer_new <span class="sc">|&gt;</span> </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(user_id, block) <span class="sc">|&gt;</span> </span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_modify</span>(</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="sc">~</span> preproc.iquizoo<span class="sc">::</span><span class="fu">cpt</span>(.x)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">|&gt;</span> </span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">id_cols =</span> user_id, </span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> block, </span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_from =</span> dprime</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>user_id) <span class="sc">|&gt;</span> </span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  psych<span class="sc">::</span><span class="fu">alpha</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Reliability analysis   
-Call: psych::alpha(x = dplyr::select(tidyr::pivot_wider(dplyr::ungroup(dplyr::group_modify(dplyr::group_by(data_racer_new, 
-    user_id, block), ~preproc.iquizoo::cpt(.x))), id_cols = user_id, 
-    names_from = block, values_from = dprime), -user_id))
-
-  raw_alpha std.alpha G6(smc) average_r S/N  ase mean   sd median_r
-      0.52      0.53    0.45      0.27 1.1 0.15  2.3 0.55     0.23
-
-    95% confidence boundaries 
-         lower alpha upper
-Feldt     0.14  0.52  0.75
-Duhachek  0.23  0.52  0.81
-
- Reliability if an item is dropped:
-   raw_alpha std.alpha G6(smc) average_r  S/N alpha se var.r med.r
-V2      0.37      0.38    0.23      0.23 0.60     0.22    NA  0.23
-V3      0.27      0.27    0.15      0.15 0.36     0.25    NA  0.15
-V1      0.59      0.60    0.42      0.42 1.48     0.14    NA  0.42
-
- Item statistics 
-    n raw.r std.r r.cor r.drop mean   sd
-V2 33  0.77  0.73  0.53   0.36  2.4 0.82
-V3 33  0.75  0.77  0.60   0.44  2.3 0.69
-V1 30  0.64  0.64  0.31   0.22  2.1 0.78</code></pre>
-</div>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>data_racer_old <span class="ot">&lt;-</span> targets<span class="sc">::</span><span class="fu">tar_read</span>(</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  data_parsed_Racer, </span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">store =</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"preproc/_targets"</span>)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(game_version <span class="sc">==</span> <span class="st">"1.0.0"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">unnest</span>(raw_parsed) <span class="sc">|&gt;</span> </span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">block =</span> <span class="fu">paste0</span>(<span class="st">"V"</span>, block))</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>data_racer_old <span class="sc">|&gt;</span> </span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(user_id, block) <span class="sc">|&gt;</span> </span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_score =</span> <span class="fu">sum</span>(produr <span class="sc">*</span> trialdur) <span class="sc">/</span> <span class="fu">sum</span>(trialdur),</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">id_cols =</span> user_id, </span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> block, </span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_from =</span> mean_score</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>user_id) <span class="sc">|&gt;</span> </span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  psych<span class="sc">::</span><span class="fu">alpha</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Reliability analysis   
-Call: psych::alpha(x = dplyr::select(tidyr::pivot_wider(dplyr::summarise(dplyr::group_by(data_racer_old, 
-    user_id, block), mean_score = sum(produr * trialdur)/sum(trialdur), 
-    .groups = "drop"), id_cols = user_id, names_from = block, 
-    values_from = mean_score), -user_id))
-
-  raw_alpha std.alpha G6(smc) average_r  S/N   ase mean sd median_r
-     0.098      0.13    0.11     0.028 0.14 0.073  221 80    0.018
-
-    95% confidence boundaries 
-         lower alpha upper
-Feldt    -0.06   0.1  0.24
-Duhachek -0.05   0.1  0.24
-
- Reliability if an item is dropped:
-   raw_alpha std.alpha G6(smc) average_r   S/N alpha se   var.r    med.r
-V1     0.162     0.161   0.130     0.046 0.192    0.072 0.00177  0.03686
-V2     0.075     0.099   0.079     0.027 0.110    0.077 0.00132  0.01817
-V3     0.079     0.106   0.085     0.029 0.118    0.076 0.00137  0.01817
-V4     0.028     0.039   0.031     0.010 0.041    0.079 0.00055  0.00446
-V5     0.073     0.104   0.087     0.028 0.116    0.076 0.00278 -0.00002
-
- Item statistics 
-     n raw.r std.r  r.cor r.drop mean  sd
-V1 363  0.62  0.43 0.0067 0.0036  310 246
-V2 363  0.38  0.47 0.1675 0.0486  197 132
-V3 363  0.39  0.47 0.1501 0.0430  192 141
-V4 363  0.47  0.52 0.3053 0.0882  200 158
-V5 363  0.43  0.47 0.1460 0.0482  205 155</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>data_racer_old <span class="sc">|&gt;</span> </span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(user_id, block) <span class="sc">|&gt;</span> </span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_modify</span>(</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="sc">~</span> preproc.iquizoo<span class="sc">::</span><span class="fu">cpt</span>(.x)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">|&gt;</span> </span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">id_cols =</span> user_id, </span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> block, </span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_from =</span> dprime</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>user_id) <span class="sc">|&gt;</span> </span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  psych<span class="sc">::</span><span class="fu">alpha</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Reliability analysis   
-Call: psych::alpha(x = dplyr::select(tidyr::pivot_wider(dplyr::ungroup(dplyr::group_modify(dplyr::group_by(data_racer_old, 
-    user_id, block), ~preproc.iquizoo::cpt(.x))), id_cols = user_id, 
-    names_from = block, values_from = dprime), -user_id))
-
-  raw_alpha std.alpha G6(smc) average_r S/N  ase mean  sd median_r
-      0.76      0.76    0.72      0.39 3.2 0.02  2.2 0.6     0.41
-
-    95% confidence boundaries 
-         lower alpha upper
-Feldt     0.72  0.76   0.8
-Duhachek  0.72  0.76   0.8
-
- Reliability if an item is dropped:
-   raw_alpha std.alpha G6(smc) average_r S/N alpha se  var.r med.r
-V1      0.73      0.73    0.67      0.40 2.7    0.023 0.0010  0.42
-V2      0.70      0.70    0.64      0.37 2.3    0.026 0.0037  0.38
-V3      0.71      0.71    0.66      0.38 2.4    0.025 0.0053  0.39
-V4      0.72      0.72    0.67      0.39 2.6    0.024 0.0036  0.41
-V5      0.72      0.72    0.67      0.39 2.6    0.024 0.0035  0.41
-
- Item statistics 
-     n raw.r std.r r.cor r.drop mean   sd
-V1 363  0.70  0.69  0.57   0.49  1.6 0.88
-V2 363  0.76  0.75  0.66   0.58  2.2 0.91
-V3 363  0.73  0.73  0.63   0.55  2.4 0.83
-V4 363  0.69  0.70  0.59   0.51  2.4 0.80
-V5 363  0.68  0.70  0.59   0.51  2.5 0.76</code></pre>
-</div>
 </div>
 
 
