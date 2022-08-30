@@ -2,7 +2,7 @@ library(targets)
 future::plan(future.callr::callr)
 purrr::walk(fs::dir_ls("R"), source)
 tar_option_set(
-  package = c("tidyverse", "preproc.iquizoo", "tarflow.iquizoo"),
+  package = c("tidyverse", "preproc.iquizoo", "tarflow.iquizoo", "bit64"),
   format = "qs",
   imports = "preproc.iquizoo",
   memory = "transient",
@@ -82,5 +82,18 @@ list(
   tar_target(indices_clean, clean_indices(indices)),
   tar_target(indices_clean_even, clean_indices(indices_even)),
   tar_target(indices_clean_odd, clean_indices(indices_odd)),
-  tarchetypes::tar_quarto(quarto_site, quiet = F)
+  tarchetypes::tar_file_read(
+    indices_selection,
+    "config/indices_filtering.xlsx",
+    read = readxl::read_excel(!!.x)
+  ),
+  tar_target(
+    indices_struct,
+    prepare_indices(
+      indices_clean,
+      indices_selection,
+      keep_result = c("target", "target-alt2")
+    )
+  ),
+  tarchetypes::tar_quarto(quarto_site, quiet = FALSE)
 )
