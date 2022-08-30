@@ -18,7 +18,7 @@
     "href": "posts/explore-struct-overall/index.html",
     "title": "Explore Cognitive Structure",
     "section": "",
-    "text": "Code\nlibrary(tidyverse)\nlibrary(corrr)\nlibrary(showtext)\nlibrary(gt)\nlibrary(formattable)\nlibrary(patchwork)\nlibrary(psych)\nrequireNamespace(\"bit64\")\n# custom scripts\npurrr::walk(fs::dir_ls(\"R\"), source)"
+    "text": "Code\nlibrary(tidyverse)\nlibrary(corrr)\nlibrary(showtext)\nlibrary(gt)\nlibrary(formattable)\nlibrary(patchwork)\nlibrary(psych)\nrequireNamespace(\"bit64\")"
   },
   {
     "objectID": "posts/explore-struct-overall/index.html#original-form",

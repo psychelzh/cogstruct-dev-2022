@@ -25,12 +25,33 @@ library(formattable)
 library(patchwork)
 library(psych)
 requireNamespace("bit64")
-# custom scripts
-purrr::walk(fs::dir_ls("R"), source)
 ```
 
 ```{r}
 #| label: utils
+
+pivot_wider_indices <- function(data, name_value = "test", always_suffix = FALSE) {
+  data |>
+    group_by(game_name) |>
+    mutate(n_index = n_distinct(index_name)) |>
+    ungroup() |>
+    mutate(
+      game_index = if (always_suffix) {
+        str_c(game_name, index_name, sep = ".")
+      } else {
+        if_else(
+          n_index == 1,
+          game_name,
+          str_c(game_name, index_name, sep = ".")
+        )
+      }
+    ) |>
+    pivot_wider(
+      id_cols = user_id,
+      names_from = game_index,
+      values_from = .data[[name_value]]
+    )
+}
 
 summary_data <- function(data, name_value = "test") {
   pivot_wider_indices(data, name_value, always_suffix = TRUE) |> 
