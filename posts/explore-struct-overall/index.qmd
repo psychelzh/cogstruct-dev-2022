@@ -91,6 +91,9 @@ transform_indices <- function(x, game_name, index_name) {
   if (game_name == "小狗回家" & index_name == "mean_score") {
     return(-log10(1 - x))
   }
+  if (game_name == "各得其所" & index_name == "mrt_init") {
+    return(log10(x))
+  }
   if (game_name == "数字推理") {
     return(sqrt(x))
   }
