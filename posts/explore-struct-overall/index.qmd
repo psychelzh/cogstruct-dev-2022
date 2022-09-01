@@ -86,6 +86,52 @@ show_normality <- function(data, game_name, index_name, skew, ...,
   )) + p_hist + p_qq +
     plot_layout(widths = c(0.1, 0.45, 0.45))
 }
+
+transform_indices <- function(x, game_name, index_name) {
+  if (game_name == "小狗回家" & index_name == "mean_score") {
+    return(-log10(1 - x))
+  }
+  if (game_name == "数字推理") {
+    return(sqrt(x))
+  }
+  if (game_name == "塔罗牌") {
+    return(-sqrt(max(x, na.rm = TRUE) - x))
+  }
+  if (game_name == "人工语言-中级") {
+    return(-sqrt(max(x, na.rm = TRUE) - x))
+  }
+  if (game_name == "语义判断") {
+    return(-log10(max(x, na.rm = TRUE) + 1 - x))
+  }
+  if (game_name == "数感") {
+    return(log10(x))
+  }
+  if (game_name == "时长分辨") {
+    return(log10(x))
+  }
+  if (game_name == "节奏感知") {
+   return(sqrt(x)) 
+  }
+  return(x)
+}
+
+calc_test_retest <- function(data, 
+                             name_test = "test", 
+                             name_retest = "retest") {
+  data_no_missing <- data |> 
+    select(all_of(c(name_test, name_retest))) |> 
+    drop_na()
+  outliers_result <- data_no_missing |> 
+    performance::check_outliers(method = "mahalanobis_robust")
+  data_no_outlier <- data_no_missing |> 
+    slice(-which(outliers_result))
+  icc_result <- ICC(data_no_outlier)
+  data.frame(
+    n_obs = icc_result$n.obs,
+    icc = icc_result$results$ICC[[2]],
+    r = cor(data_no_outlier[[name_test]], data_no_outlier[[name_retest]])
+  )
+}
 ```
 
 ```{r}
@@ -194,22 +240,20 @@ game_needs_trans <- indices_stats |>
   filter(abs(skew) > 0.5)
 indices_trans <- indices |> 
   group_by(game_name, index_name) |> 
-  mutate(
-    test_trans = case_when(
-      game_name == "小狗回家" & index_name == "mean_score" ~ -log10(1 - test), 
-      game_name == "各得其所" & index_name == "mrt_init" ~ log10(test),
-      game_name == "数字推理" ~ sqrt(test),
-      game_name == "塔罗牌" ~ -sqrt(max(test) - test),
-      game_name == "人工语言-中级" ~ -sqrt(max(test) - test),
-      game_name == "语义判断" ~ -log10(max(test) + 1 - test),
-      game_name == "数感" ~ log10(test),
-      game_name == "时长分辨" ~ log10(test),
-      game_name == "节奏感知" ~ sqrt(test),
-      TRUE ~ test
-    ),
-    score_trans = if_else(reversed == "yes", -test_trans, test_trans)
+  group_modify(
+    ~ .x |> 
+      mutate(
+        across(
+          c(test, retest),
+          transform_indices,
+          game_name = .y$game_name,
+          index_name = .y$index_name,
+          .names = "{.col}_trans"
+        )
+      )
   ) |> 
-  ungroup()
+  ungroup() |> 
+  mutate(score_trans = if_else(reversed == "yes", -test_trans, test_trans))
 indices_stats_trans <- summary_data(indices_trans, name_value = "test_trans")
 ```
 
@@ -229,18 +273,103 @@ indices_trans |>
 
 From @fig-normality-trans, we know these indices now perform very well on normality. The transformations seem to be useful.
 
-```{r}
-#| label: prepare-data
+# Data Checking on Reliability
 
-indices_trans_wider <- pivot_wider_indices(
-  indices_trans, 
-  name_value = "score_trans",
-  always_suffix = TRUE
-)
-indices_trans_wider_bare <- select(indices_trans_wider, -user_id)
+```{r}
+#| label: reliability-list
+#| column: page
+
+test_retest_raw <- indices_trans |> 
+  group_by(game_name, index_name, dimension) |> 
+  group_modify(~ calc_test_retest(.)) |> 
+  ungroup()
+test_retest_trans <- indices_trans |>
+  semi_join(game_needs_trans, by = c("game_name", "index_name")) |> 
+  group_by(game_name, index_name, dimension) |> 
+  group_modify(
+    ~ calc_test_retest(
+      .,
+      name_test = "test_trans",
+      name_retest = "retest_trans"
+    ) |> 
+      rename_with(~str_c(., "_trans"))
+  ) |> 
+  ungroup()
+test_retest <- test_retest_raw |> 
+  left_join(
+    test_retest_trans, 
+    by = c("game_name", "index_name", "dimension")
+  )
+format_na <- function(str, x) {
+  ifelse(is.na(x), "-", str)
+}
+test_retest |> 
+  mutate(
+    across(
+      starts_with(c("icc", "r")), 
+      ~ digits(., 2, postproc = format_na)
+    ),
+    n_obs_trans = digits(n_obs_trans, 0, postproc = format_na)
+  ) |>
+  formattable(
+    list(
+      formattable::area(col = c(icc, icc_trans)) ~ 
+        color_tile("white", "pink", na.rm = TRUE),
+      game_name = formatter(
+        "span",
+        style = ~ if_else(
+          coalesce(icc_trans, icc) < 0.5,
+          "background:grey",
+          NA_character_
+        )
+      )
+    )
+  ) |> 
+  as.datatable()
+```
+
+From the above table, it shows that the transformations are successful in elevating test-retest reliability. Kline stated in their book [-@applied2013]: "If $r_{xx} < .50$, then most of the total variance is due to measurement error. Indicators with such low score reliabilities should be excluded from the analysis." We should remove those indices with test-retest reliability less than 0.5 (grey background cells) according to this quote. The removed indicators are:
+
+```{r}
+#| label: indicators-removed
+
+indicators_remove <- test_retest |> 
+  mutate(icc = coalesce(icc_trans, icc)) |> 
+  filter(icc < 0.5) |> 
+  select(game_name, index_name, dimension, icc)
+indicators_remove |> 
+  knitr::kable(
+    digits = 2, 
+    caption = "Removed Indicators", 
+    row.names = TRUE
+  )
 ```
 
 # Data Checking on Correlation Matrix
+
+```{r}
+#| label: prepare-data
+
+indices_wider <- indices_trans |> 
+  anti_join(indicators_remove, by = c("game_name", "index_name")) |> 
+  pivot_wider_indices( 
+    name_value = "score_trans",
+    always_suffix = TRUE
+  ) |> 
+  left_join(
+    users |> 
+      mutate(school = str_remove(school, "认知实验")) |> 
+      select(user_id, school),
+    by = "user_id"
+  )
+indices_wider_bare <- select(indices_wider, -user_id, -school)
+indices_wider_bare_sic <- indices_wider |>
+  filter(school == "四川师范大学") |> 
+  select(-user_id, -school) 
+indices_wider_bare_bj <- indices_wider |>
+  filter(school != "四川师范大学") |> 
+  select(-user_id, -school) 
+```
 
 ```{r}
 #| label: fig-miss-pattern
@@ -249,7 +378,7 @@ indices_trans_wider_bare <- select(indices_trans_wider, -user_id)
 #| fig-width: 15
 #| fig-height: 9
 
-naniar::vis_miss(indices_trans_wider_bare) +
+naniar::vis_miss(indices_wider_bare) +
   scale_y_continuous(expand = c(0, 0), trans = "reverse") +
   theme(axis.text.x = element_text(angle = 90))
 ```
@@ -258,10 +387,22 @@ naniar::vis_miss(indices_trans_wider_bare) +
 #| label: fig-overall-correlation
 #| column: page
 #| fig-cap: Overview of Correlation Matrix
+#| fig-subcap: 
+#|   - Whole Dataset
+#|   - Sishuan Dataset
+#|   - Beijing Dataset
 #| fig-width: 15
 #| fig-height: 15
 
-indices_trans_wider_bare |>
+indices_wider_bare |>
+  correlate(quiet = TRUE) |>
+  autoplot(method = "HC", triangular = "full") +
+  scico::scale_fill_scico(palette = "bam", midpoint = 0, direction = -1)
+indices_wider_bare_sic |> 
+  correlate(quiet = TRUE) |>
+  autoplot(method = "HC", triangular = "full") +
+  scico::scale_fill_scico(palette = "bam", midpoint = 0, direction = -1)
+indices_wider_bare_bj |> 
   correlate(quiet = TRUE) |>
   autoplot(method = "HC", triangular = "full") +
   scico::scale_fill_scico(palette = "bam", midpoint = 0, direction = -1)
@@ -270,14 +411,23 @@ indices_trans_wider_bare |>
 ## Bartlett's Test
 
 ```{r}
-#| label: bartlett-test
+#| label: tbl-bartlett-test
+#| tbl-cap: Bartlett Test for Different Dataset
 
-psych::cortest.bartlett(indices_trans_wider_bare) |> 
-  as_tibble() |> 
+list(
+  Whole = indices_wider_bare,
+  `Sichuan Dataset` = indices_wider_bare_sic,
+  `Beijing Dataset` = indices_wider_bare_bj
+) |> 
+  map(
+    ~ psych::cortest.bartlett(.) |> 
+      as_tibble()
+  ) |> 
+  bind_rows(.id = "Data Source") |> 
   knitr::kable(digits = 2)
 ```
 
-The small p value (\<\< 0.05) indicates the correlation matrix is suitable for factor analysis.
+@tbl-bartlett-test shows that Beijing data set is not appropriate for further analysis, because the correlation matrix is not positive definite. Further check on the data shows there is only `r sum(complete.cases(indices_wider_bare_bj))` complete cases, which corrupts the data set. But the whole data set and Sichuan sub data set are all suitable for further analysis.
 
 ## Sampling Adequacy
 
@@ -288,16 +438,29 @@ KMO test: this test will give us an index of how well the matrix is suited for f
 ```{r}
 #| label: KMO-result
 
-kmo_result <- psych::KMO(indices_trans_wider_bare)
-kmo_result$MSAi |> 
-  enframe(name = "game_index_name", value = "MSA") |> 
+kmo_result <- psych::KMO(indices_wider_bare)
+kmo_result_sic <- psych::KMO(indices_wider_bare_sic)
+bind_rows(
+  whole = kmo_result$MSAi |> 
+    enframe(name = "game_index_name", value = "MSA"),
+  sichuan = kmo_result_sic$MSAi |> 
+    enframe(name = "game_index_name", value = "MSA"),
+  .id = "src"
+) |> 
   separate(game_index_name, c("game_name", "index_name"), sep = "\\.") |> 
   mutate(MSA = digits(MSA, 2)) |> 
+  pivot_wider(
+    names_from = src,
+    values_from = MSA,
+    names_prefix = "MSA_"
+  ) |> 
   formattable() |> 
-  as.datatable(caption = "KMO test result")
+  as.datatable(caption = "KMO Test Result")
 ```
 
-The overall MSA value is `r round(kmo_result$MSA, 2)`. However, there are `r sum(kmo_result$MSAi < 0.6)` indices with MSA value lower than 0.6, which is generally acceptable.
+-   For the whole data set, the overall MSA value is `r round(kmo_result$MSA, 2)`. However, there are `r sum(kmo_result$MSAi < 0.6)` indices with MSA value lower than 0.6, which is generally acceptable.
+
+-   For the Sichuan data set, the overall MSA value is `r round(kmo_result_sic$MSA, 2)`. However, there are `r sum(kmo_result_sic$MSAi < 0.6)` indices with MSA value lower than 0.6, which is generally acceptable.
 
 # Exploratory Factor Analysis
 
@@ -307,56 +470,128 @@ The overall MSA value is `r round(kmo_result$MSA, 2)`. However, there are `r sum
 #| label: calc-factors
 #| fig-show: hide
 
-n_factor_result <- psych::nfactors(indices_trans_wider_bare)
+n_factor_whole <- psych::nfactors(indices_wider_bare)
+n_factor_sic <- psych::nfactors(indices_wider_bare_sic)
 ```
 
 ```{r}
 #| label: tbl-nfactors
 #| tbl-cap: Number of Factors Tests
+#| tbl-subcap: 
+#|   - Whole Dataset
+#|   - Sichuan Dataset
 
-checks <- c("BIC", "SABIC", "eBIC", "MAP")
-n_factor_result$vss.stats |>
-  as_tibble() |>
-  select(BIC, SABIC, eBIC) |>
-  mutate(n_factor = seq_len(n()), .before = 1L) |>
-  add_column(MAP = n_factor_result$map) |> 
-  gt() |> 
-  fmt_number(
-    -c(n_factor, MAP),
-    decimals = 0
-  ) |>
-  fmt_scientific(MAP) |>
-  tab_style(
-    style = cell_text(weight = "bold"),
-    locations = map(
-      checks,
-      ~ cells_body(
-        columns = all_of(.x),
-        rows = !!sym(.x) == min(!!sym(.x))
+format_n_factors <- function(n_factor_result) {
+  checks <- c("BIC", "SABIC", "eBIC", "MAP")
+  n_factor_result$vss.stats |>
+    as_tibble() |>
+    select(BIC, SABIC, eBIC) |>
+    mutate(n_factor = seq_len(n()), .before = 1L) |>
+    add_column(MAP = n_factor_result$map) |> 
+    gt() |> 
+    fmt_number(
+      -c(n_factor, MAP),
+      decimals = 0
+    ) |>
+    fmt_scientific(MAP) |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = map(
+        checks,
+        ~ cells_body(
+          columns = all_of(.x),
+          rows = !!sym(.x) == min(!!sym(.x))
+        )
       )
-    )
-  ) |> 
-  as_raw_html()
+    ) |> 
+    as_raw_html()
+}
+
+format_n_factors(n_factor_whole)
+format_n_factors(n_factor_sic)
 ```
 
-From @tbl-nfactors, we noticed inconsistencies. So we try factor numbers as 7 or 3.
-
-## Results of 7-factor
+From @tbl-nfactors, we noticed inconsistencies. So we try factor numbers as 9, 6 and 3.
 
 ```{r}
-#| label: efa-seven-factor-oblimin
+#| label: utils-efa
+
+plotly_efa <- function(model) {
+  heatmaply::heatmaply_cor(
+    t(unclass(model$loadings)),
+    dendrogram = "column",
+    k_col = NA,
+    label_format_fun = function(...) round(..., digits = 2),
+    margin = c(50, 50, 50, 0)
+  )
+}
+```
+
+## Results of 9 factors
+
+```{r}
+#| label: fig-nine-factor-whole
+#| fig-cap: Nine Factors Result (Whole Dataset)
 #| column: page
 
-fitted <- psych::fa(indices_trans_wider_bare, 7)
-parameters::model_parameters(fitted, sort = TRUE, threshold = "max")
+fitted <- fa(indices_wider_bare, 9)
+plotly_efa(fitted)
 ```
 
 ```{r}
-#| label: efa-seven-factor-varimin
+#| label: fig-nine-factor-sic
+#| fig-cap: Nine Factors Result (Sichuan Dataset)
 #| column: page
 
-fitted <- fa(indices_trans_wider_bare, 7, rotate = "varimin")
+fitted_sic <- fa(indices_wider_bare_sic, 9)
+plotly_efa(fitted_sic)
+```
+
+## Results of 6 factors
+
+```{r}
+#| label: fig-six-factor-whole
+#| fig-cap: Six Factors Result (Whole Dataset)
+#| column: page
+
+fitted <- fa(indices_wider_bare, 6)
+plotly_efa(fitted)
+```
+
+```{r}
+#| label: fig-six-factor-sic
+#| fig-cap: Six Factors Result (Sichuan Dataset)
+#| column: page
+
+fitted_sic <- fa(indices_wider_bare_sic, 6)
+plotly_efa(fitted_sic)
+```
+
+```{r}
+#| label: six-factor-varimin
+#| column: page
+#| eval: false
+
+fitted <- fa(indices_wider_bare, 7, rotate = "varimin")
 parameters::model_parameters(fitted, sort = TRUE, threshold = 0.3)
 ```
 
+## Results of 3 factors
 
+```{r}
+#| label: fig-three-factor-whole
+#| fig-cap: Three Factors Result (Whole Dataset)
+#| column: page
+
+fitted <- fa(indices_wider_bare, 3)
+plotly_efa(fitted)
+```
+
+```{r}
+#| label: fig-three-factor-sic
+#| fig-cap: Three Factors Result (Sichuan Dataset)
+#| column: page
+
+fitted_sic <- fa(indices_wider_bare_sic, 3)
+plotly_efa(fitted_sic)
+```

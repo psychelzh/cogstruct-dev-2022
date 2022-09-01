@@ -84,8 +84,8 @@ list(
   tar_target(indices_clean_odd, clean_indices(indices_odd)),
   tarchetypes::tar_file_read(
     indices_selection,
-    "config/indices_filtering.xlsx",
-    read = readxl::read_excel(!!.x)
+    "config/indices_filtering.csv",
+    read = read_csv(!!.x, show_col_types = FALSE)
   ),
   tar_target(
     indices_struct,
