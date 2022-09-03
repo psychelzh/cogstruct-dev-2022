@@ -242,6 +242,7 @@ From @fig-normality-skewed, it might be a good choice to transform indices with 
 game_needs_trans <- indices_stats |>
   filter(abs(skew) > 0.5)
 indices_trans <- indices |> 
+  semi_join(game_needs_trans, by = c("game_name", "index_name")) |> 
   group_by(game_name, index_name) |> 
   group_modify(
     ~ .x |> 
@@ -250,14 +251,25 @@ indices_trans <- indices |>
           c(test, retest),
           transform_indices,
           game_name = .y$game_name,
-          index_name = .y$index_name,
-          .names = "{.col}_trans"
+          index_name = .y$index_name
         )
       )
   ) |> 
   ungroup() |> 
-  mutate(score_trans = if_else(reversed == "yes", -test_trans, test_trans))
-indices_stats_trans <- summary_data(indices_trans, name_value = "test_trans")
+  mutate(score = if_else(reversed == "yes", -test, test))
+indices_stats_trans <- summary_data(indices_trans)
+indices_pooled <- bind_rows(
+  origin = indices,
+  trans = indices_trans,
+  .id = "index_type"
+) |> 
+  left_join(
+    game_needs_trans |> 
+      add_column(need_trans = TRUE) |> 
+      select(game_name, index_name, need_trans),
+    by = c("game_name", "index_name")
+  ) |> 
+  mutate(need_trans = coalesce(need_trans, FALSE))
 ```
 
 ```{r}
@@ -268,9 +280,8 @@ indices_stats_trans <- summary_data(indices_trans, name_value = "test_trans")
 
 indices_trans |> 
   inner_join(indices_stats_trans, by = c("game_name", "index_name")) |> 
-  semi_join(game_needs_trans, by = c("game_name", "index_name")) |> 
   group_nest(game_name, index_name, skew, skew_status) |> 
-  pmap(show_normality, name_value = "test_trans") |> 
+  pmap(show_normality) |> 
   wrap_plots(ncol = 1)
 ```
 
@@ -282,31 +293,20 @@ From @fig-normality-trans, we know these indices now perform very well on normal
 #| label: reliability-list
 #| column: page
 
-test_retest_raw <- indices_trans |> 
-  group_by(game_name, index_name, dimension) |> 
+test_retest <- indices_pooled |> 
+  group_by(game_name, index_name, dimension, index_type, need_trans) |> 
   group_modify(~ calc_test_retest(.)) |> 
   ungroup()
-test_retest_trans <- indices_trans |>
-  semi_join(game_needs_trans, by = c("game_name", "index_name")) |> 
-  group_by(game_name, index_name, dimension) |> 
-  group_modify(
-    ~ calc_test_retest(
-      .,
-      name_test = "test_trans",
-      name_retest = "retest_trans"
-    ) |> 
-      rename_with(~str_c(., "_trans"))
-  ) |> 
-  ungroup()
-test_retest <- test_retest_raw |> 
-  left_join(
-    test_retest_trans, 
-    by = c("game_name", "index_name", "dimension")
-  )
 format_na <- function(str, x) {
   ifelse(is.na(x), "-", str)
 }
 test_retest |> 
+  pivot_wider(
+    id_cols = c(game_name, index_name),
+    names_from = index_type,
+    values_from = c(n_obs, icc, r),
+    names_vary = "slowest"
+  ) |> 
   mutate(
     across(
       starts_with(c("icc", "r")), 
@@ -316,12 +316,12 @@ test_retest |>
   ) |>
   formattable(
     list(
-      formattable::area(col = c(icc, icc_trans)) ~ 
+      formattable::area(col = c(icc_origin, icc_trans)) ~ 
         color_tile("white", "pink", na.rm = TRUE),
       game_name = formatter(
         "span",
         style = ~ if_else(
-          coalesce(icc_trans, icc) < 0.5,
+          coalesce(icc_trans, icc_origin) < 0.5,
           "background:grey",
           NA_character_
         )
@@ -337,7 +337,7 @@ From the above table, it shows that the transformations are successful in elevat
 #| label: indicators-removed
 
 indicators_remove <- test_retest |> 
-  mutate(icc = coalesce(icc_trans, icc)) |> 
+  filter(!need_trans | (index_type == "trans" & need_trans)) |>
   filter(icc < 0.5) |> 
   select(game_name, index_name, dimension, icc)
 indicators_remove |> 
@@ -348,15 +348,64 @@ indicators_remove |>
   )
 ```
 
+Note there is a very special case, i.e. "我是大厨", whose pearson correlation coefficient is substantially larger than ICC value. Further analysis (see @fig-cook-test-retest) shows that participants improve more if they perform worse in the first test. In this case, it makes us doubt whether intraclass correlation (ICC) is suitable for cognitive ability tests for there is always practice effect (they do no really use parallel versions).
+
+```{r}
+#| label: fig-cook-test-retest
+#| fig-cap: Special Case for Test-retest Reliability
+#| fig-width: 6
+#| fig-height: 6
+
+indices_pooled |> 
+  filter(game_name == "我是大厨") |> 
+  ggplot(aes(test, retest)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ x) +
+  geom_abline(
+    slope = 1, 
+    intercept = 0, 
+    linetype = "dotted",
+    color = "lightblue"
+  ) +
+  theme_bw() +
+  coord_fixed() +
+  labs(x = "Test Phase", y = "Retest Phase")
+```
+
+But see @fig-scatter-icc-pearson, these two reliability indices are closely correlated with each other.
+
+```{r}
+#| label: fig-scatter-icc-pearson
+#| fig-cap: Correlation Between ICC and Pearson's Coefficient
+#| fig-height: 6
+#| fig-width: 6
+
+test_retest |> 
+  ggplot(aes(icc, r)) +
+  geom_point() +
+  stat_smooth(method = "lm", formula = y ~ x) +
+  ggpmisc::stat_correlation(small.r = TRUE) +
+  geom_abline(
+    slope = 1, 
+    intercept = 0, 
+    linetype = "dotted",
+    color = "lightblue"
+  ) +
+  theme_bw() +
+  labs(x = "ICC", y = "Pearson's Coefficient") +
+  coord_fixed()
+```
+
 # Data Checking on Correlation Matrix
 
 ```{r}
 #| label: prepare-data
 
-indices_wider <- indices_trans |> 
+indices_wider <- indices_pooled |> 
   anti_join(indicators_remove, by = c("game_name", "index_name")) |> 
+  filter(!need_trans | (index_type == "trans" & need_trans)) |> 
   pivot_wider_indices( 
-    name_value = "score_trans",
+    name_value = "score",
     always_suffix = TRUE
   ) |> 
   left_join(
