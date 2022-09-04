@@ -15,6 +15,6 @@ format:
   html:
     theme: cosmo
     css: styles.css
-
-
-
+    comments:
+      hypothesis:
+        openSidebar: false
