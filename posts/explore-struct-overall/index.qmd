@@ -2,13 +2,13 @@
 title: Explore Cognitive Structure
 author: Liang Zhang
 date: 2022-08-21
-format: 
-  html: 
+format:
+  html:
     code-fold: true
     toc: true
     toc-location: left
 category: structure
-execute: 
+execute:
   warning: false
   showtext: true
 bibliography: references.bib
@@ -54,12 +54,12 @@ pivot_wider_indices <- function(data, name_value = "test", always_suffix = FALSE
 }
 
 summary_data <- function(data, name_value = "test") {
-  pivot_wider_indices(data, name_value, always_suffix = TRUE) |> 
-    select(-user_id) |> 
-    psych::describe() |> 
-    as_tibble(rownames = "game_index_name") |> 
-    select(game_index_name, n, mean, sd, min, max, skew, kurtosis) |> 
-    separate(game_index_name, c("game_name", "index_name"), sep = "\\.") |> 
+  pivot_wider_indices(data, name_value, always_suffix = TRUE) |>
+    select(-user_id) |>
+    psych::describe() |>
+    as_tibble(rownames = "game_index_name") |>
+    select(game_index_name, n, mean, sd, min, max, skew, kurtosis) |>
+    separate(game_index_name, c("game_name", "index_name"), sep = "\\.") |>
     mutate(
       skew_status = case_when(
         abs(skew) > 1 ~ "highly",
@@ -69,13 +69,13 @@ summary_data <- function(data, name_value = "test") {
     )
 }
 
-show_normality <- function(data, game_name, index_name, skew, ..., 
+show_normality <- function(data, game_name, index_name, skew, ...,
                            name_value = "test") {
-  p_hist <- ggplot(data, aes_string(name_value)) + 
+  p_hist <- ggplot(data, aes_string(name_value)) +
     geom_histogram(bins = 30) +
     labs(x = "Raw Score", y = "Count") +
     theme_bw()
-  p_qq <- ggplot(data, aes_string(sample = name_value)) + 
+  p_qq <- ggplot(data, aes_string(sample = name_value)) +
     geom_qq() +
     geom_qq_line() +
     labs(x = "Expected Quantile", y = "Observed Quantile") +
@@ -113,20 +113,20 @@ transform_indices <- function(x, game_name, index_name) {
     return(log10(x))
   }
   if (game_name == "节奏感知") {
-   return(sqrt(x)) 
+   return(sqrt(x))
   }
   return(x)
 }
 
-calc_test_retest <- function(data, 
-                             name_test = "test", 
+calc_test_retest <- function(data,
+                             name_test = "test",
                              name_retest = "retest") {
-  data_no_missing <- data |> 
-    select(all_of(c(name_test, name_retest))) |> 
+  data_no_missing <- data |>
+    select(all_of(c(name_test, name_retest))) |>
     drop_na()
-  outliers_result <- data_no_missing |> 
+  outliers_result <- data_no_missing |>
     performance::check_outliers(method = "mahalanobis_robust")
-  data_no_outlier <- data_no_missing |> 
+  data_no_outlier <- data_no_missing |>
     slice(-which(outliers_result))
   icc_result <- ICC(data_no_outlier)
   data.frame(
@@ -150,7 +150,7 @@ dim_order <- c(
   "speeded IP", "strategic IP",
   "perception", "math", "language"
 )
-indices <- indices_struct |> 
+indices <- indices_struct |>
   arrange(factor(dimension, dim_order)) |>
   group_by(game_name, index_name) |>
   # remove 1d outliers based on "iqr"
@@ -172,9 +172,9 @@ It is necessary to check normality before performing exploratory analysis.
 #| fig-width: 10
 #| fig-height: 18
 
-indices |> 
-  mutate(facet_title = str_c(game_name, index_name, sep = "\n")) |> 
-  ggplot(aes(test)) + 
+indices |>
+  mutate(facet_title = str_c(game_name, index_name, sep = "\n")) |>
+  ggplot(aes(test)) +
   geom_histogram(bins = 30) +
   facet_wrap(~facet_title, scales = "free", ncol = 5) +
   labs(x = "Raw Score", y = "Count") +
@@ -188,9 +188,9 @@ indices |>
 #| fig-width: 10
 #| fig-height: 18
 
-indices |> 
-  mutate(facet_title = str_c(game_name, index_name, sep = "\n")) |> 
-  ggplot(aes(sample = test)) + 
+indices |>
+  mutate(facet_title = str_c(game_name, index_name, sep = "\n")) |>
+  ggplot(aes(sample = test)) +
   geom_qq() +
   geom_qq_line() +
   facet_wrap(~facet_title, scales = "free", ncol = 5) +
@@ -204,9 +204,9 @@ According to a classic book [@kline2016], critical value for absolute skewness i
 #| label: data-description
 #| column: page
 
-indices_stats |> 
-  mutate(across(mean:kurtosis, ~ digits(., 3))) |> 
-  formattable() |> 
+indices_stats |>
+  mutate(across(mean:kurtosis, ~ digits(., 3))) |>
+  formattable() |>
   as.datatable(
     caption = "Descriptive Statistics of All Indices"
   )
@@ -222,15 +222,15 @@ Here we decide to convert the moderately and highly indices based on the convers
 #| fig-width: 8
 #| fig-height: 18
 
-indices |> 
+indices |>
   inner_join(
-    indices_stats |> 
-      select(game_name, index_name, skew, skew_status) |> 
-      filter(skew_status != "acceptable"), 
+    indices_stats |>
+      select(game_name, index_name, skew, skew_status) |>
+      filter(skew_status != "acceptable"),
     by = c("game_name", "index_name")
-  ) |> 
-  group_nest(game_name, index_name, skew, skew_status) |> 
-  pmap(show_normality) |> 
+  ) |>
+  group_nest(game_name, index_name, skew, skew_status) |>
+  pmap(show_normality) |>
   wrap_plots(ncol = 1)
 ```
 
@@ -241,11 +241,11 @@ From @fig-normality-skewed, it might be a good choice to transform indices with 
 
 game_needs_trans <- indices_stats |>
   filter(abs(skew) > 0.5)
-indices_trans <- indices |> 
-  semi_join(game_needs_trans, by = c("game_name", "index_name")) |> 
-  group_by(game_name, index_name) |> 
+indices_trans <- indices |>
+  semi_join(game_needs_trans, by = c("game_name", "index_name")) |>
+  group_by(game_name, index_name) |>
   group_modify(
-    ~ .x |> 
+    ~ .x |>
       mutate(
         across(
           c(test, retest),
@@ -254,21 +254,21 @@ indices_trans <- indices |>
           index_name = .y$index_name
         )
       )
-  ) |> 
-  ungroup() |> 
+  ) |>
+  ungroup() |>
   mutate(score = if_else(reversed == "yes", -test, test))
 indices_stats_trans <- summary_data(indices_trans)
 indices_pooled <- bind_rows(
   origin = indices,
   trans = indices_trans,
   .id = "index_type"
-) |> 
+) |>
   left_join(
-    game_needs_trans |> 
-      add_column(need_trans = TRUE) |> 
+    game_needs_trans |>
+      add_column(need_trans = TRUE) |>
       select(game_name, index_name, need_trans),
     by = c("game_name", "index_name")
-  ) |> 
+  ) |>
   mutate(need_trans = coalesce(need_trans, FALSE))
 ```
 
@@ -278,10 +278,10 @@ indices_pooled <- bind_rows(
 #| fig-width: 8
 #| fig-height: 18
 
-indices_trans |> 
-  inner_join(indices_stats_trans, by = c("game_name", "index_name")) |> 
-  group_nest(game_name, index_name, skew, skew_status) |> 
-  pmap(show_normality) |> 
+indices_trans |>
+  inner_join(indices_stats_trans, by = c("game_name", "index_name")) |>
+  group_nest(game_name, index_name, skew, skew_status) |>
+  pmap(show_normality) |>
   wrap_plots(ncol = 1)
 ```
 
@@ -293,30 +293,30 @@ From @fig-normality-trans, we know these indices now perform very well on normal
 #| label: reliability-list
 #| column: page
 
-test_retest <- indices_pooled |> 
-  group_by(game_name, index_name, dimension, index_type, need_trans) |> 
-  group_modify(~ calc_test_retest(.)) |> 
+test_retest <- indices_pooled |>
+  group_by(game_name, index_name, dimension, index_type, need_trans) |>
+  group_modify(~ calc_test_retest(.)) |>
   ungroup()
 format_na <- function(str, x) {
   ifelse(is.na(x), "-", str)
 }
-test_retest |> 
+test_retest |>
   pivot_wider(
     id_cols = c(game_name, index_name),
     names_from = index_type,
     values_from = c(n_obs, icc, r),
     names_vary = "slowest"
-  ) |> 
+  ) |>
   mutate(
     across(
-      starts_with(c("icc", "r")), 
+      starts_with(c("icc", "r")),
       ~ digits(., 2, postproc = format_na)
     ),
     n_obs_trans = digits(n_obs_trans, 0, postproc = format_na)
   ) |>
   formattable(
     list(
-      formattable::area(col = c(icc_origin, icc_trans)) ~ 
+      formattable::area(col = c(icc_origin, icc_trans)) ~
         color_tile("white", "pink", na.rm = TRUE),
       game_name = formatter(
         "span",
@@ -327,7 +327,7 @@ test_retest |>
         )
       )
     )
-  ) |> 
+  ) |>
   as.datatable()
 ```
 
@@ -336,14 +336,14 @@ From the above table, it shows that the transformations are successful in elevat
 ```{r}
 #| label: indicators-removed
 
-indicators_remove <- test_retest |> 
+indicators_remove <- test_retest |>
   filter(!need_trans | (index_type == "trans" & need_trans)) |>
-  filter(icc < 0.5) |> 
+  filter(icc < 0.5) |>
   select(game_name, index_name, dimension, icc)
-indicators_remove |> 
+indicators_remove |>
   knitr::kable(
-    digits = 2, 
-    caption = "Removed Indicators", 
+    digits = 2,
+    caption = "Removed Indicators",
     row.names = TRUE
   )
 ```
@@ -356,14 +356,14 @@ Note there is a very special case, i.e. "我是大厨", whose pearson correlatio
 #| fig-width: 6
 #| fig-height: 6
 
-indices_pooled |> 
-  filter(game_name == "我是大厨") |> 
+indices_pooled |>
+  filter(game_name == "我是大厨") |>
   ggplot(aes(test, retest)) +
   geom_point() +
   geom_smooth(method = "lm", formula = y ~ x) +
   geom_abline(
-    slope = 1, 
-    intercept = 0, 
+    slope = 1,
+    intercept = 0,
     linetype = "dotted",
     color = "lightblue"
   ) +
@@ -380,14 +380,14 @@ But see @fig-scatter-icc-pearson, these two reliability indices are closely corr
 #| fig-height: 6
 #| fig-width: 6
 
-test_retest |> 
+test_retest |>
   ggplot(aes(icc, r)) +
   geom_point() +
   stat_smooth(method = "lm", formula = y ~ x) +
   ggpmisc::stat_correlation(small.r = TRUE) +
   geom_abline(
-    slope = 1, 
-    intercept = 0, 
+    slope = 1,
+    intercept = 0,
     linetype = "dotted",
     color = "lightblue"
   ) +
@@ -401,26 +401,26 @@ test_retest |>
 ```{r}
 #| label: prepare-data
 
-indices_wider <- indices_pooled |> 
-  anti_join(indicators_remove, by = c("game_name", "index_name")) |> 
-  filter(!need_trans | (index_type == "trans" & need_trans)) |> 
-  pivot_wider_indices( 
+indices_wider <- indices_pooled |>
+  anti_join(indicators_remove, by = c("game_name", "index_name")) |>
+  filter(!need_trans | (index_type == "trans" & need_trans)) |>
+  pivot_wider_indices(
     name_value = "score",
     always_suffix = TRUE
-  ) |> 
+  ) |>
   left_join(
-    users |> 
-      mutate(school = str_remove(school, "认知实验")) |> 
+    users |>
+      mutate(school = str_remove(school, "认知实验")) |>
       select(user_id, school),
     by = "user_id"
   )
 indices_wider_bare <- select(indices_wider, -user_id, -school)
 indices_wider_bare_sic <- indices_wider |>
-  filter(school == "四川师范大学") |> 
-  select(-user_id, -school) 
+  filter(school == "四川师范大学") |>
+  select(-user_id, -school)
 indices_wider_bare_bj <- indices_wider |>
-  filter(school != "四川师范大学") |> 
-  select(-user_id, -school) 
+  filter(school != "四川师范大学") |>
+  select(-user_id, -school)
 ```
 
 ```{r}
@@ -439,7 +439,7 @@ naniar::vis_miss(indices_wider_bare) +
 #| label: fig-overall-correlation
 #| column: page
 #| fig-cap: Overview of Correlation Matrix
-#| fig-subcap: 
+#| fig-subcap:
 #|   - Whole Dataset
 #|   - Sishuan Dataset
 #|   - Beijing Dataset
@@ -450,11 +450,11 @@ indices_wider_bare |>
   correlate(quiet = TRUE) |>
   autoplot(method = "HC", triangular = "full") +
   scico::scale_fill_scico(palette = "bam", midpoint = 0, direction = -1)
-indices_wider_bare_sic |> 
+indices_wider_bare_sic |>
   correlate(quiet = TRUE) |>
   autoplot(method = "HC", triangular = "full") +
   scico::scale_fill_scico(palette = "bam", midpoint = 0, direction = -1)
-indices_wider_bare_bj |> 
+indices_wider_bare_bj |>
   correlate(quiet = TRUE) |>
   autoplot(method = "HC", triangular = "full") +
   scico::scale_fill_scico(palette = "bam", midpoint = 0, direction = -1)
@@ -470,12 +470,12 @@ list(
   Whole = indices_wider_bare,
   `Sichuan Dataset` = indices_wider_bare_sic,
   `Beijing Dataset` = indices_wider_bare_bj
-) |> 
+) |>
   map(
-    ~ psych::cortest.bartlett(.) |> 
+    ~ psych::cortest.bartlett(.) |>
       as_tibble()
-  ) |> 
-  bind_rows(.id = "Data Source") |> 
+  ) |>
+  bind_rows(.id = "Data Source") |>
   knitr::kable(digits = 2)
 ```
 
@@ -493,20 +493,20 @@ KMO test: this test will give us an index of how well the matrix is suited for f
 kmo_result <- psych::KMO(indices_wider_bare)
 kmo_result_sic <- psych::KMO(indices_wider_bare_sic)
 bind_rows(
-  whole = kmo_result$MSAi |> 
+  whole = kmo_result$MSAi |>
     enframe(name = "game_index_name", value = "MSA"),
-  sichuan = kmo_result_sic$MSAi |> 
+  sichuan = kmo_result_sic$MSAi |>
     enframe(name = "game_index_name", value = "MSA"),
   .id = "src"
-) |> 
-  separate(game_index_name, c("game_name", "index_name"), sep = "\\.") |> 
-  mutate(MSA = digits(MSA, 2)) |> 
+) |>
+  separate(game_index_name, c("game_name", "index_name"), sep = "\\.") |>
+  mutate(MSA = digits(MSA, 2)) |>
   pivot_wider(
     names_from = src,
     values_from = MSA,
     names_prefix = "MSA_"
-  ) |> 
-  formattable() |> 
+  ) |>
+  formattable() |>
   as.datatable(caption = "KMO Test Result")
 ```
 
@@ -529,7 +529,7 @@ n_factor_sic <- psych::nfactors(indices_wider_bare_sic)
 ```{r}
 #| label: tbl-nfactors
 #| tbl-cap: Number of Factors Tests
-#| tbl-subcap: 
+#| tbl-subcap:
 #|   - Whole Dataset
 #|   - Sichuan Dataset
 
@@ -539,8 +539,8 @@ format_n_factors <- function(n_factor_result) {
     as_tibble() |>
     select(BIC, SABIC, eBIC) |>
     mutate(n_factor = seq_len(n()), .before = 1L) |>
-    add_column(MAP = n_factor_result$map) |> 
-    gt() |> 
+    add_column(MAP = n_factor_result$map) |>
+    gt() |>
     fmt_number(
       -c(n_factor, MAP),
       decimals = 0
@@ -555,7 +555,7 @@ format_n_factors <- function(n_factor_result) {
           rows = !!sym(.x) == min(!!sym(.x))
         )
       )
-    ) |> 
+    ) |>
     as_raw_html()
 }
 

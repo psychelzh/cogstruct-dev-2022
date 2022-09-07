@@ -3,7 +3,7 @@ title: "Extracting Cognitive Factors from Large-Scale Meta-Anslysis Data"
 author: ["Yifei Cao", "Liang Zhang"]
 date: "2022-05-10"
 draft: false
-format: 
+format:
   html:
     code-fold: true
     toc: true
@@ -28,49 +28,43 @@ library(psych)
 
 To summarize briefly, I followed the step of Beam et al. _(2021, Nature Neuroscience)_ to find evidence for the structure of human cognition. Firstly, filtering all studies that included the testing paradigms that consisted with those used in our project from the database of Neurosynth, I conducted 28 meta-analysis separately on each group of fMRI studies. Thanks to NiMARE _(a python research environment for neuroimaging meta-analysis)_, I could easily perform Multilevel Kernel Density Analysis (MKDA) on hundreds fMRI studies without manually coding.
 
-```{r}
-#| fig-cap: Example Figure1. MKDA result plot for fMRI studies using Wisconsin Card Sorting Games
-knitr::include_graphics("wisconsin.png")
-```
+![](wisconsin.png)
 
-```{r}
-#| fig-cap: Example Figure1. MKDA result plot for fMRI studies using Stroop task
-knitr::include_graphics("stroop.png")
-```
+![](stroop.png)
 
 ```{r}
 #| cache: true
-cog_label <- readxl::read_xlsx("Selected_cogconstruct_label.xlsx")
-label_occur <- readxl::read_xlsx("dtm_210114.xlsx")
+cog_label <- readxl::read_xlsx(box::file("Selected_cogconstruct_label.xlsx"))
+label_occur <- readxl::read_xlsx(box::file("dtm_210114.xlsx"))
 
-occur_combined <- label_occur %>% 
-  pivot_longer(cols = -c("study_id"), names_to = "term_name", values_to = "occurrence") %>% 
-  left_join(cog_label, by = "term_name") %>% 
-  filter(!is.na(meta_name)) %>% 
-  group_by(study_id, meta_name) %>% 
-  summarize(task_occurrence = sum(occurrence)) %>% 
+occur_combined <- label_occur %>%
+  pivot_longer(cols = -c("study_id"), names_to = "term_name", values_to = "occurrence") %>%
+  left_join(cog_label, by = "term_name") %>%
+  filter(!is.na(meta_name)) %>%
+  group_by(study_id, meta_name) %>%
+  summarize(task_occurrence = sum(occurrence)) %>%
   filter(task_occurrence > 1)
-total_occur <- occur_combined %>% 
-  group_by(meta_name) %>% 
-  summarize(total_occurrence = length(study_id)) %>% 
-  filter(total_occurrence > 16) %>% 
+total_occur <- occur_combined %>%
+  group_by(meta_name) %>%
+  summarize(total_occurrence = length(study_id)) %>%
+  filter(total_occurrence > 16) %>%
   mutate(Paradigm_name = meta_name,
-         Number_of_studies = total_occurrence) %>% 
-  select(Paradigm_name, Number_of_studies) %>% 
+         Number_of_studies = total_occurrence) %>%
+  select(Paradigm_name, Number_of_studies) %>%
   arrange(desc(Number_of_studies))
 ```
 
 Here is the summarize table for the number of included fMRI studies in each meta-analysis.
 
 ```{r}
-total_occur |> 
+total_occur |>
   htmlTable::htmlTable()
 ```
 
 ```{r}
 #| cache: true
-total_matrix <- fs::dir_ls("data", regexp = "xlsx") %>% 
-  map(readxl::read_xlsx, col_names = TRUE) %>% 
+total_matrix <- fs::dir_ls(box::file("data"), regexp = "xlsx") %>%
+  map(readxl::read_xlsx, col_names = TRUE) %>%
   reduce(left_join, by = "voxel_num")
 ```
 
@@ -80,11 +74,11 @@ Here is the representational similarity matrix of the 28 meta-analysis results, 
 ```{r}
 #| fig-width: 10
 #| fig-height: 8
-total_nonzero <- total_matrix[which(rowSums(total_matrix) > 0),] %>% 
+total_nonzero <- total_matrix[which(rowSums(total_matrix) > 0),] %>%
   select(-voxel_num)
 cor_total <- round(cor(total_matrix),2)
 cor_nonzero <- round(cor(total_nonzero),2)
-melted_cor_nonzero <- melt(cor_nonzero) %>% 
+melted_cor_nonzero <- melt(cor_nonzero) %>%
  mutate(percrank=rank(value)/length(value))
 
 correlate(total_nonzero, quiet = TRUE) |>
@@ -101,8 +95,8 @@ correlate(total_nonzero, quiet = TRUE) |>
 # ggplot(data = melted_cor_nonzero, aes(Var2, Var1, fill = percrank))+
 #  geom_tile(color = "black")+
 #   scale_fill_viridis(discrete=FALSE)+
-#   theme_minimal()+ 
-#  theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+#   theme_minimal()+
+#  theme(axis.text.x = element_text(angle = 45, vjust = 1,
 #     size = 7, hjust = 1),
 #     axis.text.y = element_text(size = 7))+
 #  coord_fixed()
@@ -111,9 +105,9 @@ correlate(total_nonzero, quiet = TRUE) |>
 # Multidimensional Scaling
 
 ```{r}
-mds <- total_nonzero |> 
-  cor(use = "pairwise") |> 
-  smacof::sim2diss(to.dist = TRUE) |> 
+mds <- total_nonzero |>
+  cor(use = "pairwise") |>
+  smacof::sim2diss(to.dist = TRUE) |>
   smacof::mds(ndim = 2, type = "mspline")
 # plot(mds, plot.type = "Shepard", main = "Shepard Diagram (Ratio Transformation)")
 # par(family = "SimHei")
