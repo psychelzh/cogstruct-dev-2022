@@ -1,3 +1,3 @@
 # cogstruct-dev
 
-This is website of our cognitive structure project to showcasing results.
+This is website of our cognitive structure project to share analysis results.
