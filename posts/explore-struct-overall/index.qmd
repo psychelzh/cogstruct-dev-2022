@@ -7,7 +7,7 @@ format:
     code-fold: true
     toc: true
     toc-location: left
-category: structure
+categories: [structure, efa]
 execute:
   warning: false
   showtext: true
@@ -226,7 +226,7 @@ It is necessary to check normality before performing exploratory analysis.
 ```{r}
 #| label: fig-histograms
 #| column: page
-#| fig-cap: Histogram of All Game Indices
+#| fig-cap: Histogram of All Task Indices
 #| fig-width: 10
 #| fig-height: 18
 
@@ -242,7 +242,7 @@ indices |>
 ```{r}
 #| label: fig-qqplot
 #| column: page
-#| fig-cap: QQ-plot of All Game Indices
+#| fig-cap: QQ-plot of All Task Indices
 #| fig-width: 10
 #| fig-height: 18
 

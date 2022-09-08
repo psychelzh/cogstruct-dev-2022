@@ -11,7 +11,7 @@
     "href": "index.html",
     "title": "Cognitive Structure Project",
     "section": "",
-    "text": "Aug 21, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\n\n\nstructure\n\n\ncognition\n\n\nmeta-analysis\n\n\n\n\n\n\n\n\n\n\n\nMay 10, 2022\n\n\nYifei Cao, Liang Zhang\n\n\n\n\n\n\nNo matching items"
+    "text": "structure\n\n\nefa\n\n\n\n\n\n\n\n\n\n\n\nAug 21, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\n\n\nstructure\n\n\ncognition\n\n\nmeta-analysis\n\n\n\n\n\n\n\n\n\n\n\nMay 10, 2022\n\n\nYifei Cao, Liang Zhang\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/explore-struct-overall/index.html",
@@ -25,7 +25,7 @@
     "href": "posts/explore-struct-overall/index.html#original-form",
     "title": "Explore Cognitive Structure",
     "section": "Original Form",
-    "text": "Original Form\n\n\nCode\nindices |>\n  mutate(facet_title = str_c(game_name, index_name, sep = \"\\n\")) |>\n  ggplot(aes(test)) +\n  geom_histogram(bins = 30) +\n  facet_wrap(~facet_title, scales = \"free\", ncol = 5) +\n  labs(x = \"Raw Score\", y = \"Count\") +\n  theme_bw()\n\n\n\n\n\nFigure 3: Histogram of All Game Indices\n\n\n\n\n\n\nCode\nindices |>\n  mutate(facet_title = str_c(game_name, index_name, sep = \"\\n\")) |>\n  ggplot(aes(sample = test)) +\n  geom_qq() +\n  geom_qq_line() +\n  facet_wrap(~facet_title, scales = \"free\", ncol = 5) +\n  labs(x = \"Expected Quantile\", y = \"Observed Quantile\") +\n  theme_bw()\n\n\n\n\n\nFigure 4: QQ-plot of All Game Indices\n\n\n\n\nAccording to a classic book (Kline 2016), critical value for absolute skewness is 3, and critical value for absolute kurtosis is 10; thus, these indices are all not too apart from normal distribution. But see Figure 3, we detect some heavily skewed indices. Just as a classic book (Bulmer 1979) said, critical value for skewness is 0.5 (moderately skew) and 1 (highly skew).\n\n\nCode\nindices_stats |>\n  mutate(across(mean:kurtosis, ~ digits(., 3))) |>\n  formattable() |>\n  as.datatable(\n    caption = \"Descriptive Statistics of All Indices\"\n  )"
+    "text": "Original Form\n\n\nCode\nindices |>\n  mutate(facet_title = str_c(game_name, index_name, sep = \"\\n\")) |>\n  ggplot(aes(test)) +\n  geom_histogram(bins = 30) +\n  facet_wrap(~facet_title, scales = \"free\", ncol = 5) +\n  labs(x = \"Raw Score\", y = \"Count\") +\n  theme_bw()\n\n\n\n\n\nFigure 3: Histogram of All Task Indices\n\n\n\n\n\n\nCode\nindices |>\n  mutate(facet_title = str_c(game_name, index_name, sep = \"\\n\")) |>\n  ggplot(aes(sample = test)) +\n  geom_qq() +\n  geom_qq_line() +\n  facet_wrap(~facet_title, scales = \"free\", ncol = 5) +\n  labs(x = \"Expected Quantile\", y = \"Observed Quantile\") +\n  theme_bw()\n\n\n\n\n\nFigure 4: QQ-plot of All Task Indices\n\n\n\n\nAccording to a classic book (Kline 2016), critical value for absolute skewness is 3, and critical value for absolute kurtosis is 10; thus, these indices are all not too apart from normal distribution. But see Figure 3, we detect some heavily skewed indices. Just as a classic book (Bulmer 1979) said, critical value for skewness is 0.5 (moderately skew) and 1 (highly skew).\n\n\nCode\nindices_stats |>\n  mutate(across(mean:kurtosis, ~ digits(., 3))) |>\n  formattable() |>\n  as.datatable(\n    caption = \"Descriptive Statistics of All Indices\"\n  )"
   },
   {
     "objectID": "posts/explore-struct-overall/index.html#transformed",
