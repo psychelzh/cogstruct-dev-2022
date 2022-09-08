@@ -87,6 +87,15 @@ list(
     "config/indices_filtering.csv",
     read = read_csv(!!.x, show_col_types = FALSE)
   ),
+  tarchetypes::tar_file_read(
+    games_calibrate,
+    "config/game_calibrate.csv",
+    read = read_csv(!!.x, show_col_types = FALSE)
+  ),
+  tar_target(
+    user_resp_check,
+    check_responses(indices_clean, games_calibrate)
+  ),
   tar_target(
     indices_struct,
     prepare_indices(

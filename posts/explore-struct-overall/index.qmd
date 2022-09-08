@@ -150,13 +150,71 @@ dim_order <- c(
   "speeded IP", "strategic IP",
   "perception", "math", "language"
 )
-indices <- indices_struct |>
+indices_outlier_info <- indices_struct |>
   arrange(factor(dimension, dim_order)) |>
-  group_by(game_name, index_name) |>
-  # remove 1d outliers based on "iqr"
-  filter(!test %in% boxplot.stats(test)$out) |>
+  group_by(game_name, index_name) |> 
+  mutate(
+    is_outlier = unclass(performance::check_outliers(test, method = "iqr"))
+  ) |> 
   ungroup()
+indices <- indices_outlier_info |> 
+  filter(!is_outlier) |> 
+  select(-is_outlier)
 indices_stats <- summary_data(indices)
+```
+
+# Data Cleaning Summary
+
+Careless responses will ruin data, especially when there are 10% or more participants respond carelessly [@woods2006]. From @fig-show-careless, it shows that participants perform badly (unmotivated) in only two games, which are known to be difficult. So we can conclude that participants were all motivated to fulfill all the tasks, there is no need to screen unmotivated participants.
+
+```{r}
+#| label: fig-show-careless
+#| fig-cap: Counts of Participants with Careless Responses
+#| fig-width: 8
+#| fig-height: 6
+
+targets::tar_load(user_resp_check)
+user_resp_check |> 
+  group_by(game_name, is_motivated) |> 
+  summarise(n = n(), .groups = "drop_last") |> 
+  mutate(prop = n / sum(n)) |> 
+  ungroup() |> 
+  arrange(desc(prop)) |> 
+  mutate(
+    game_name = as_factor(game_name),
+    is_motivated = factor(is_motivated, c(FALSE, TRUE), c("Unmotivated", "Motivated"))
+  ) |> 
+  ggplot(aes(game_name, n, fill = is_motivated)) +
+  geom_col() +
+  geom_text(
+    aes(label = scales::label_percent(accuracy = 0.1)(prop)),
+    position = position_stack(vjust = 0.5)
+  ) +
+  scale_fill_brewer(palette = "Paired") +
+  coord_flip() +
+  ggpubr::theme_pubclean(flip = TRUE) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    legend.title = element_blank()
+  )
+```
+
+Another issue is outliers. We screened out one-dimension outliers using Tukey's boxplot method, with a coefficient of 1.5, i.e., participants perform out of 1.5 inter-quantile range from the first and third quartiles are screened out. @fig-outlier-summary shows a summary of removed participants for all tasks, in which the task '节奏感知' stood out, with `r with(indices_outlier_info, sum(is_outlier[game_name == "节奏感知"]))` participants removed.
+
+```{r}
+#| label: fig-outlier-summary
+#| fig-cap: Summary of Removed Outliers Count for Each Task
+#| fig-width: 8
+#| fig-height: 6
+
+indices_outlier_info |> 
+  group_by(game_name, index_name) |> 
+  summarise(n_outlier = sum(is_outlier, na.rm = TRUE), .groups = "drop") |> 
+  ggplot(aes(n_outlier)) +
+  geom_histogram(fill = "white", color = "black", bins = 30) +
+  theme_bw() +
+  labs(x = "Count of Outliers", y = "Count of Task Indices")
 ```
 
 # Data Checking on Normality
