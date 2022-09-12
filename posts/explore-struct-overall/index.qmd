@@ -135,6 +135,54 @@ calc_test_retest <- function(data,
     r = cor(data_no_outlier[[name_test]], data_no_outlier[[name_retest]])
   )
 }
+
+vis_cor <- function(x, ...) {
+  x |> 
+    correlate(...) |>
+    autoplot(
+      method = "HC", 
+      triangular = "full",
+      low = "blue",
+      high = "red"
+    ) +
+    theme(aspect.ratio = 1)
+}
+
+format_n_factors <- function(n_factor_result) {
+  checks <- c("BIC", "SABIC", "eBIC", "MAP")
+  n_factor_result$vss.stats |>
+    as_tibble() |>
+    select(BIC, SABIC, eBIC) |>
+    mutate(n_factor = seq_len(n()), .before = 1L) |>
+    add_column(MAP = n_factor_result$map) |>
+    gt() |>
+    fmt_number(
+      -c(n_factor, MAP),
+      decimals = 0
+    ) |>
+    fmt_scientific(MAP) |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = map(
+        checks,
+        ~ cells_body(
+          columns = all_of(.x),
+          rows = !!sym(.x) == min(!!sym(.x))
+        )
+      )
+    ) |>
+    as_raw_html()
+}
+
+plotly_efa <- function(model) {
+  heatmaply::heatmaply_cor(
+    t(unclass(model$loadings)),
+    dendrogram = "column",
+    k_col = NA,
+    label_format_fun = function(...) round(..., digits = 2),
+    margin = c(50, 50, 50, 0)
+  )
+}
 ```
 
 ```{r}
@@ -165,7 +213,7 @@ indices_stats <- summary_data(indices)
 
 # Data Cleaning Summary
 
-Careless responses will ruin data, especially when there are 10% or more participants respond carelessly [@woods2006]. From @fig-show-careless, it shows that participants perform badly (unmotivated) in only two games, which are known to be difficult. So we can conclude that participants were all motivated to fulfill all the tasks, there is no need to screen unmotivated participants.
+Careless responses will ruin data, especially when there are 10% or more participants respond carelessly [@woods2006]. From @fig-show-careless, it shows that there were two tasks in which more than 10% of participants performed badly (labelled `'unmotivated'` in the figure). These two games are known to be difficult. So we can conclude that participants were all motivated to fulfill all the tasks, there is no need to screen unmotivated participants.
 
 ```{r}
 #| label: fig-show-careless
@@ -504,19 +552,12 @@ naniar::vis_miss(indices_wider_bare) +
 #| fig-width: 15
 #| fig-height: 15
 
-indices_wider_bare |>
-  correlate(quiet = TRUE) |>
-  autoplot(method = "HC", triangular = "full") +
-  scico::scale_fill_scico(palette = "bam", midpoint = 0, direction = -1)
-indices_wider_bare_sic |>
-  correlate(quiet = TRUE) |>
-  autoplot(method = "HC", triangular = "full") +
-  scico::scale_fill_scico(palette = "bam", midpoint = 0, direction = -1)
-indices_wider_bare_bj |>
-  correlate(quiet = TRUE) |>
-  autoplot(method = "HC", triangular = "full") +
-  scico::scale_fill_scico(palette = "bam", midpoint = 0, direction = -1)
+vis_cor(indices_wider_bare, quiet = TRUE)
+vis_cor(indices_wider_bare_sic, quiet = TRUE)
+vis_cor(indices_wider_bare_bj, quiet = TRUE)
 ```
+
+The correlation matrix of Beijing Data set is not positive definite, thus not appropriate for further analysis. Further check on the data shows there are only `r sum(complete.cases(indices_wider_bare_bj))` complete cases, which corrupts the data set. But the whole data set and Sichuan sub data set are all suitable for further analysis.
 
 ## Bartlett's Test
 
@@ -526,8 +567,7 @@ indices_wider_bare_bj |>
 
 list(
   Whole = indices_wider_bare,
-  `Sichuan Dataset` = indices_wider_bare_sic,
-  `Beijing Dataset` = indices_wider_bare_bj
+  `Sichuan Dataset` = indices_wider_bare_sic
 ) |>
   map(
     ~ psych::cortest.bartlett(.) |>
@@ -536,8 +576,6 @@ list(
   bind_rows(.id = "Data Source") |>
   knitr::kable(digits = 2)
 ```
-
-@tbl-bartlett-test shows that Beijing data set is not appropriate for further analysis, because the correlation matrix is not positive definite. Further check on the data shows there is only `r sum(complete.cases(indices_wider_bare_bj))` complete cases, which corrupts the data set. But the whole data set and Sichuan sub data set are all suitable for further analysis.
 
 ## Sampling Adequacy
 
@@ -591,51 +629,11 @@ n_factor_sic <- psych::nfactors(indices_wider_bare_sic)
 #|   - Whole Dataset
 #|   - Sichuan Dataset
 
-format_n_factors <- function(n_factor_result) {
-  checks <- c("BIC", "SABIC", "eBIC", "MAP")
-  n_factor_result$vss.stats |>
-    as_tibble() |>
-    select(BIC, SABIC, eBIC) |>
-    mutate(n_factor = seq_len(n()), .before = 1L) |>
-    add_column(MAP = n_factor_result$map) |>
-    gt() |>
-    fmt_number(
-      -c(n_factor, MAP),
-      decimals = 0
-    ) |>
-    fmt_scientific(MAP) |>
-    tab_style(
-      style = cell_text(weight = "bold"),
-      locations = map(
-        checks,
-        ~ cells_body(
-          columns = all_of(.x),
-          rows = !!sym(.x) == min(!!sym(.x))
-        )
-      )
-    ) |>
-    as_raw_html()
-}
-
 format_n_factors(n_factor_whole)
 format_n_factors(n_factor_sic)
 ```
 
 From @tbl-nfactors, we noticed inconsistencies. So we try factor numbers as 9, 6 and 3.
-
-```{r}
-#| label: utils-efa
-
-plotly_efa <- function(model) {
-  heatmaply::heatmaply_cor(
-    t(unclass(model$loadings)),
-    dendrogram = "column",
-    k_col = NA,
-    label_format_fun = function(...) round(..., digits = 2),
-    margin = c(50, 50, 50, 0)
-  )
-}
-```
 
 ## Results of 9 factors
 
@@ -649,6 +647,12 @@ plotly_efa(fitted)
 ```
 
 ```{r}
+#| label: nine-factor-whole
+#| column: page
+parameters::model_parameters(fitted, sort = TRUE, threshold = "max")
+```
+
+```{r}
 #| label: fig-nine-factor-sic
 #| fig-cap: Nine Factors Result (Sichuan Dataset)
 #| column: page
@@ -656,6 +660,14 @@ plotly_efa(fitted)
 fitted_sic <- fa(indices_wider_bare_sic, 9)
 plotly_efa(fitted_sic)
 ```
+
+```{r}
+#| label: nine-factor-sic
+#| column: page
+parameters::model_parameters(fitted_sic, sort = TRUE, threshold = "max")
+```
+
+These two models have the least sample size adjusted BIC, but it captures many trivial factors with two to three task indices. Factors need at least three manifest variables to be stable or meaningful. But see @fig-overall-correlation, these factors are a reflection of those task pairs with a rather high correlation (about 0.5) with each other, both of which have relatively lower correlations with other tasks.
 
 ## Results of 6 factors
 
@@ -669,6 +681,12 @@ plotly_efa(fitted)
 ```
 
 ```{r}
+#| label: six-factor-whole
+#| column: page
+parameters::model_parameters(fitted, sort = TRUE, threshold = "max")
+```
+
+```{r}
 #| label: fig-six-factor-sic
 #| fig-cap: Six Factors Result (Sichuan Dataset)
 #| column: page
@@ -678,12 +696,9 @@ plotly_efa(fitted_sic)
 ```
 
 ```{r}
-#| label: six-factor-varimin
+#| label: six-factor-sic
 #| column: page
-#| eval: false
-
-fitted <- fa(indices_wider_bare, 7, rotate = "varimin")
-parameters::model_parameters(fitted, sort = TRUE, threshold = 0.3)
+parameters::model_parameters(fitted_sic, sort = TRUE, threshold = "max")
 ```
 
 ## Results of 3 factors
@@ -698,10 +713,219 @@ plotly_efa(fitted)
 ```
 
 ```{r}
+#| label: three-factor-whole
+#| column: page
+parameters::model_parameters(fitted, sort = TRUE, threshold = "max")
+```
+
+```{r}
 #| label: fig-three-factor-sic
 #| fig-cap: Three Factors Result (Sichuan Dataset)
 #| column: page
 
 fitted_sic <- fa(indices_wider_bare_sic, 3)
 plotly_efa(fitted_sic)
+```
+
+```{r}
+#| label: three-factor-sic
+#| column: page
+parameters::model_parameters(fitted_sic, sort = TRUE, threshold = "max")
+```
+
+# Keep Variables of Low-reliability
+
+In the following we try using all the variables regardless its test-retest reliability.
+
+```{r}
+#| label: prepare-data-full
+
+indices_wider <- indices_pooled |>
+  filter(!need_trans | (index_type == "trans" & need_trans)) |>
+  pivot_wider_indices(
+    name_value = "score",
+    always_suffix = TRUE
+  ) |>
+  left_join(
+    users |>
+      mutate(school = str_remove(school, "认知实验")) |>
+      select(user_id, school),
+    by = "user_id"
+  )
+indices_wider_bare <- select(indices_wider, -user_id, -school)
+indices_wider_bare_sic <- indices_wider |>
+  filter(school == "四川师范大学") |>
+  select(-user_id, -school)
+indices_wider_bare_bj <- indices_wider |>
+  filter(school != "四川师范大学") |>
+  select(-user_id, -school)
+```
+
+## Correlation Matrix
+
+```{r}
+#| label: fig-miss-pattern-full
+#| column: page
+#| fig-cap: Missing Pattern
+#| fig-width: 15
+#| fig-height: 9
+
+naniar::vis_miss(indices_wider_bare) +
+  scale_y_continuous(expand = c(0, 0), trans = "reverse") +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+```{r}
+#| label: fig-overall-correlation-full
+#| column: page
+#| fig-cap: Overview of Correlation Matrix
+#| fig-subcap:
+#|   - Whole Dataset
+#|   - Sishuan Dataset
+#|   - Beijing Dataset
+#| fig-width: 15
+#| fig-height: 15
+
+vis_cor(indices_wider_bare, quiet = TRUE)
+vis_cor(indices_wider_bare_sic, quiet = TRUE)
+vis_cor(indices_wider_bare_bj, quiet = TRUE)
+```
+
+Further checking on the correlation matrix of Beijing Data set shows it is not positive definite, either.
+
+### Bartlett's Test
+
+```{r}
+#| label: tbl-bartlett-test-full
+#| tbl-cap: Bartlett Test for Different Dataset
+
+list(
+  Whole = indices_wider_bare,
+  `Sichuan Dataset` = indices_wider_bare_sic
+) |>
+  map(
+    ~ psych::cortest.bartlett(.) |>
+      as_tibble()
+  ) |>
+  bind_rows(.id = "Data Source") |>
+  knitr::kable(digits = 2)
+```
+
+### Sampling Adequacy
+
+```{r}
+#| label: KMO-result-full
+
+kmo_result <- psych::KMO(indices_wider_bare)
+kmo_result_sic <- psych::KMO(indices_wider_bare_sic)
+bind_rows(
+  whole = kmo_result$MSAi |>
+    enframe(name = "game_index_name", value = "MSA"),
+  sichuan = kmo_result_sic$MSAi |>
+    enframe(name = "game_index_name", value = "MSA"),
+  .id = "src"
+) |>
+  separate(game_index_name, c("game_name", "index_name"), sep = "\\.") |>
+  arrange(desc(MSA)) |> 
+  mutate(MSA = digits(MSA, 2)) |>
+  pivot_wider(
+    names_from = src,
+    values_from = MSA,
+    names_prefix = "MSA_"
+  ) |>
+  formattable() |>
+  as.datatable(caption = "KMO Test Result")
+indices_wider_bare <- select(indices_wider_bare, -候鸟迁徙PRO.switch_cost_mrt)
+```
+
+One variable (switch cost for 候鸟迁徙) for the whole data set show too low MSA value (< 0.5). Further analysis does not include it, and further analysis will stick with the whole data set only.
+
+## Determining Number of Factors
+
+```{r}
+#| label: calc-factors-full
+#| fig-show: hide
+
+n_factor_whole <- psych::nfactors(indices_wider_bare)
+```
+
+```{r}
+#| label: tbl-nfactors-full
+#| tbl-cap: Number of Factors Tests
+
+format_n_factors(n_factor_whole)
+```
+
+## Nine Factor Model
+
+```{r}
+#| label: fig-nine-factor-whole-full
+#| fig-cap: Nine Factors Result (Whole Dataset)
+#| column: page
+
+fitted <- fa(indices_wider_bare, 9)
+plotly_efa(fitted)
+```
+
+```{r}
+#| label: nine-factor-whole-full
+#| column: page
+parameters::model_parameters(fitted, sort = TRUE, threshold = "max")
+```
+
+## Seven Factor Model
+
+```{r}
+#| label: fig-seven-factor-whole-full
+#| fig-cap: Seven Factors Result (Whole Dataset)
+#| column: page
+
+fitted <- fa(indices_wider_bare, 7)
+plotly_efa(fitted)
+```
+
+```{r}
+#| label: seven-factor-whole-full
+#| column: page
+parameters::model_parameters(fitted, sort = TRUE, threshold = "max")
+```
+
+## Three Factor Model
+
+```{r}
+#| label: fig-three-factor-whole-full
+#| fig-cap: Three Factors Result (Whole Dataset)
+#| column: page
+
+fitted <- fa(indices_wider_bare, 3)
+plotly_efa(fitted)
+```
+
+```{r}
+#| label: three-factor-whole-full
+#| column: page
+parameters::model_parameters(fitted, sort = TRUE, threshold = "max")
+```
+
+# Additional Analysis
+
+One might be interested which tasks will have the highest loading if we fit only one latent factor. Here is the result (note the variable with low MSA value is still removed):
+
+```{r}
+#| label: fig-one-factor-loading
+#| fig-cap: Loadings on One Factor Model
+#| fig-height: 12
+#| fig-width: 10
+
+model_one_fac <- fa(indices_wider_bare, 1)
+model_one_fac$loadings |> 
+  unclass() |> 
+  as_tibble(rownames = "variable") |> 
+  mutate(variable = fct_reorder(variable, MR1)) |>  
+  ggplot(aes(variable, MR1)) +
+  geom_col() +
+  coord_flip() +
+  theme_bw() +
+  labs(y = "Loading") +
+  theme(axis.title.y = element_blank())
 ```
