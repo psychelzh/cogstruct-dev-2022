@@ -276,13 +276,12 @@ It is necessary to check normality before performing exploratory analysis.
 #| column: page
 #| fig-cap: Histogram of All Task Indices
 #| fig-width: 10
-#| fig-height: 18
+#| fig-height: 20
 
 indices |>
-  mutate(facet_title = str_c(game_name, index_name, sep = "\n")) |>
   ggplot(aes(test)) +
   geom_histogram(bins = 30) +
-  facet_wrap(~facet_title, scales = "free", ncol = 5) +
+  facet_wrap(vars(game_name, index_name), scales = "free", ncol = 5) +
   labs(x = "Raw Score", y = "Count") +
   theme_bw()
 ```
@@ -292,14 +291,13 @@ indices |>
 #| column: page
 #| fig-cap: QQ-plot of All Task Indices
 #| fig-width: 10
-#| fig-height: 18
+#| fig-height: 20
 
 indices |>
-  mutate(facet_title = str_c(game_name, index_name, sep = "\n")) |>
   ggplot(aes(sample = test)) +
   geom_qq() +
   geom_qq_line() +
-  facet_wrap(~facet_title, scales = "free", ncol = 5) +
+  facet_wrap(vars(game_name, index_name), scales = "free", ncol = 5) +
   labs(x = "Expected Quantile", y = "Observed Quantile") +
   theme_bw()
 ```
@@ -452,6 +450,27 @@ indicators_remove |>
     caption = "Removed Indicators",
     row.names = TRUE
   )
+```
+
+```{r}
+#| label: fig-scatter-low-reliability
+#| fig-cap: Scatterplot of Low Reliability Tasks
+#| fig-width: 6
+#| fig-height: 15
+
+indices_pooled |> 
+  filter(!need_trans | (index_type == "trans" & need_trans)) |>
+  semi_join(indicators_remove, by = c("game_name", "index_name", "dimension")) |> 
+  drop_na() |> 
+  ggplot(aes(test, retest)) +
+  geom_point() +
+  ggpmisc::stat_poly_line() +
+  ggpmisc::stat_correlation(small.r = TRUE) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dotted", color = "red") +
+  facet_wrap(vars(game_name, index_name), scales = "free", ncol = 3) +
+  labs(x = "Test", y = "Retest") +
+  theme_bw() +
+  theme(aspect.ratio = 1)
 ```
 
 Note there is a very special case, i.e. "我是大厨", whose pearson correlation coefficient is substantially larger than ICC value. Further analysis (see @fig-cook-test-retest) shows that participants improve more if they perform worse in the first test. In this case, it makes us doubt whether intraclass correlation (ICC) is suitable for cognitive ability tests for there is always practice effect (they do no really use parallel versions).
