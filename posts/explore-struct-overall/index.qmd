@@ -454,7 +454,12 @@ indicators_remove |>
 
 ```{r}
 #| label: fig-scatter-low-reliability
-#| fig-cap: Scatterplot of Low Reliability Tasks
+#| fig-subcap: 
+#|   - Scatterplot of Low Reliability Tasks
+#|   - Scatterplot of Low Reliability Tasks (Removed four careless)
+#|   - Scatterplot of Low Reliability Tasks (No outlier)
+#| layout-ncol: 3
+#| column: page
 #| fig-width: 6
 #| fig-height: 15
 
@@ -462,6 +467,50 @@ indices_pooled |>
   filter(!need_trans | (index_type == "trans" & need_trans)) |>
   semi_join(indicators_remove, by = c("game_name", "index_name", "dimension")) |> 
   drop_na() |> 
+  ggplot(aes(test, retest)) +
+  geom_point() +
+  ggpmisc::stat_poly_line() +
+  ggpmisc::stat_correlation(small.r = TRUE) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dotted", color = "red") +
+  facet_wrap(vars(game_name, index_name), scales = "free", ncol = 3) +
+  labs(x = "Test", y = "Retest") +
+  theme_bw() +
+  theme(aspect.ratio = 1)
+careless_suspect <- targets::tar_read(data_parsed_NVRB) |> 
+  unnest(raw_parsed) |> 
+  group_by(user_id) |> 
+  filter(mean(rt) < 2000) |> 
+  ungroup() |> 
+  distinct(user_id)
+indices_pooled |> 
+  filter(!need_trans | (index_type == "trans" & need_trans)) |>
+  semi_join(indicators_remove, by = c("game_name", "index_name", "dimension")) |> 
+  anti_join(careless_suspect, by = "user_id") |> 
+  drop_na() |> 
+  ggplot(aes(test, retest)) +
+  geom_point() +
+  ggpmisc::stat_poly_line() +
+  ggpmisc::stat_correlation(small.r = TRUE) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dotted", color = "red") +
+  facet_wrap(vars(game_name, index_name), scales = "free", ncol = 3) +
+  labs(x = "Test", y = "Retest") +
+  theme_bw() +
+  theme(aspect.ratio = 1)
+indices_pooled |> 
+  filter(!need_trans | (index_type == "trans" & need_trans)) |>
+  semi_join(indicators_remove, by = c("game_name", "index_name", "dimension")) |> 
+  anti_join(careless_suspect, by = "user_id") |> 
+  drop_na() |> 
+  group_by(game_name, index_name) |> 
+  mutate(
+    performance::check_outliers(
+      tibble(test, retest), 
+      method = "mahalanobis_robust"
+    ) |> 
+      as_tibble()
+  ) |> 
+  ungroup() |> 
+  filter(!Outlier) |> 
   ggplot(aes(test, retest)) +
   geom_point() +
   ggpmisc::stat_poly_line() +
