@@ -140,7 +140,6 @@ vis_cor <- function(x, ...) {
   x |> 
     correlate(...) |>
     autoplot(
-      method = "HC", 
       triangular = "full",
       low = "blue",
       high = "red"
@@ -190,7 +189,7 @@ plotly_efa <- function(model) {
 
 targets::tar_load(users)
 targets::tar_load(indices_selection)
-targets::tar_load(indices_struct)
+targets::tar_load(indices_clean)
 dim_order <- c(
   "attention", "multitask", "switching", "inhibition",
   "reasoning", "complex span", "working memory", "short term memory",
@@ -198,7 +197,13 @@ dim_order <- c(
   "speeded IP", "strategic IP",
   "perception", "math", "language"
 )
-indices_outlier_info <- indices_struct |>
+indices_outlier_info <- indices_clean |>
+  full_join(
+    indices_selection,
+    by = c("game_name", "game_name_abbr", "index_name")
+  ) |>
+  filter(check_result %in% c("target", "target-alt2")) |>
+  mutate(score = if_else(reversed == "yes", -test, test)) |> 
   arrange(factor(dimension, dim_order)) |>
   group_by(game_name, index_name) |> 
   mutate(

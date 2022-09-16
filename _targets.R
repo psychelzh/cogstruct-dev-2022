@@ -96,13 +96,5 @@ list(
     user_resp_check,
     check_responses(indices_clean, games_calibrate)
   ),
-  tar_target(
-    indices_struct,
-    prepare_indices(
-      indices_clean,
-      indices_selection,
-      keep_result = c("target", "target-alt2")
-    )
-  ),
   tarchetypes::tar_quarto(quarto_site, quiet = FALSE)
 )
