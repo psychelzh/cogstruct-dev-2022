@@ -61,23 +61,23 @@ list(
   targets_data,
   tarchetypes::tar_combine(
     data_parsed,
-    targets_data[[2]]
+    targets_data$data_parsed
   ),
   tarchetypes::tar_combine(
     data_valid,
-    targets_data[[3]]
+    targets_data$data_valid
   ),
   tarchetypes::tar_combine(
     indices,
-    targets_data[[4]]
+    targets_data$indices
   ),
   tarchetypes::tar_combine(
     indices_even,
-    targets_data[[7]]
+    targets_data$indices_even
   ),
   tarchetypes::tar_combine(
     indices_odd,
-    targets_data[[8]]
+    targets_data$indices_odd
   ),
   tar_target(indices_clean, clean_indices(indices)),
   tar_target(indices_clean_even, clean_indices(indices_even)),
