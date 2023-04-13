@@ -1,0 +1,3 @@
+'2022':
+  script: _targets_2022.R
+  store: _targets/2022
