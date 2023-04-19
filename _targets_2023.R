@@ -1,5 +1,5 @@
 library(targets)
-Sys.setenv(R_CONFIG_ACTIVE = "2022")
+Sys.setenv(R_CONFIG_ACTIVE = "2023")
 future::plan(future.callr::callr)
 purrr::walk(fs::dir_ls("R"), source)
 tar_option_set(
@@ -26,25 +26,9 @@ targets_data <- tarchetypes::tar_map(
   ),
   tar_target(
     indices,
-    preproc_data(data_valid, prep_fun, .input = input, .extra = extra)
-  ),
-  tar_target(
-    data_valid_even,
-    data_valid |>
-      mutate(raw_parsed = map(raw_parsed, ~ slice(., seq(2, n(), 2))))
-  ),
-  tar_target(
-    data_valid_odd,
-    data_valid |>
-      mutate(raw_parsed = map(raw_parsed, ~ slice(., seq(1, n(), 2))))
-  ),
-  tar_target(
-    indices_even,
-    preproc_data(data_valid_even, prep_fun, .input = input, .extra = extra)
-  ),
-  tar_target(
-    indices_odd,
-    preproc_data(data_valid_odd, prep_fun, .input = input, .extra = extra)
+    if (!is.na(prep_fun_name)) {
+      preproc_data(data_valid, prep_fun, .input = input, .extra = extra)
+    }
   ),
   # configurations
   tar_target(
@@ -59,6 +43,18 @@ list(
   tar_target(query_tmpl_users, fs::path("sql", "users.tmpl.sql"), format = "file"),
   tar_target(users, tarflow.iquizoo::pickup(query_tmpl_users, config_where)),
   tar_target(query_tmpl_data, fs::path("sql", "data.tmpl.sql"), format = "file"),
+  tarchetypes::tar_file_read(
+    users_project_progress,
+    fs::path("sql", "progress.tmpl.sql"),
+    read = pickup(!!.x, config_where)
+  ),
+  tar_target(
+    users_completed,
+    users_project_progress |>
+      filter(str_detect(project_name, "^认知实验[A-E]$")) |>
+      summarise(n = sum(project_progress) / 100, .by = user_id) |>
+      filter(n == 5)
+  ),
   targets_data,
   tarchetypes::tar_combine(
     data_parsed,
@@ -72,30 +68,36 @@ list(
     indices,
     targets_data$indices
   ),
-  tarchetypes::tar_combine(
-    indices_even,
-    targets_data$indices_even
-  ),
-  tarchetypes::tar_combine(
-    indices_odd,
-    targets_data$indices_odd
-  ),
-  tar_target(indices_clean, clean_indices(indices)),
-  tar_target(indices_clean_even, clean_indices(indices_even)),
-  tar_target(indices_clean_odd, clean_indices(indices_odd)),
-  tarchetypes::tar_file_read(
-    indices_selection,
-    "config/indices_filtering.csv",
-    read = read_csv(!!.x, show_col_types = FALSE)
+  tar_target(
+    indices_clean,
+    clean_indices_single(indices, users_completed)
   ),
   tarchetypes::tar_file_read(
-    games_calibrate,
-    "config/game_calibrate.csv",
+    config_indices,
+    "config/indices_filtering_2023.csv",
     read = read_csv(!!.x, show_col_types = FALSE)
   ),
   tar_target(
-    user_resp_check,
-    check_responses(indices_clean, games_calibrate)
-  ),
-  tarchetypes::tar_quarto(quarto_site, quiet = FALSE)
+    indices_of_interest,
+    indices_clean |>
+      left_join(
+        config_indices,
+        join_by(game_name, game_name_abbr, index_name)
+      ) |>
+      filter(!is.na(dimension)) |>
+      mutate(score = if_else(reversed, -score, score)) |>
+      mutate(n_indices = n_distinct(index_name), .by = game_id) |>
+      mutate(
+        game_index = if_else(
+          n_indices == 2,
+          str_c(game_name_abbr, index_name, sep = "."),
+          game_name_abbr
+        )
+      ) |>
+      pivot_wider(
+        id_cols = user_id,
+        names_from = game_index,
+        values_from = score
+      )
+  )
 )
