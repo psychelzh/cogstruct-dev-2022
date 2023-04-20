@@ -26,11 +26,16 @@ validate_raw_parsed <- function(data_parsed, games_req_kb) {
 }
 check_version <- function(data) {
   data |>
+    mutate(
+      ver_major = game_version |>
+        str_extract("\\d+\\.\\d+\\.\\d+") |>
+        numeric_version() |>
+        #TODO: could be _[, 1] in future release of R
+        (\(.) .[, 1])()
+    ) |>
     filter(
       case_when(
         game_name == "瑞文高级推理" ~ TRUE,
-        game_name == "舒尔特方格（中级）" ~ game_version == "3.0.0",
-        game_name == "过目不忘PRO" ~ game_version == "2.0.0",
         # vital errors in the task programs for these days
         str_detect(
           game_name,
@@ -47,9 +52,11 @@ check_version <- function(data) {
             collapse = "|"
           )
         ) ~ game_time > "2022-06-01",
-        TRUE ~ game_version == max(game_version)
+        # make sure the latest major revisions were included
+        .default = ver_major == max(ver_major)
       )
-    )
+    ) |>
+    select(-ver_major)
 }
 check_used_mouse <- function(raw_parsed, game_name) {
   if (!has_name(raw_parsed, "device")) {
