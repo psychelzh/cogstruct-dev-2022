@@ -22,6 +22,20 @@ validate_raw_parsed <- function(data_parsed, games_req_kb) {
         raw_parsed, game_name,
         check_raw_data
       )
+    ) |>
+    mutate(
+      raw_parsed = map_if(
+        raw_parsed,
+        # field "acc" before this date should be corrected for this task
+        game_name == "文字推理" & game_time < "2023-04-03",
+        ~ . |>
+          mutate(
+            acc = map2_int(
+              cresp, resp,
+              ~ all(str_split_1(.x, ",") %in% str_split_1(.y, ","))
+            )
+          )
+      )
     )
 }
 check_version <- function(data) {
