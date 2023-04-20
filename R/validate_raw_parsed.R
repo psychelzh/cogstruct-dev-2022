@@ -16,7 +16,7 @@ validate_raw_parsed <- function(data_parsed, games_req_kb) {
       # some games require keyboard input
       map2_lgl(
         raw_parsed, game_name,
-        ~ !(check_used_mouse(.x) & .y %in% games_req_kb)
+        ~ !(check_used_mouse(.x, .y) & .y %in% games_req_kb)
       ),
       map2_lgl(
         raw_parsed, game_name,
@@ -51,9 +51,17 @@ check_version <- function(data) {
       )
     )
 }
-check_used_mouse <- function(raw_parsed) {
+check_used_mouse <- function(raw_parsed, game_name) {
   if (!has_name(raw_parsed, "device")) {
     return(TRUE)
+  }
+  # keyboard press of right-arrow was recorded as "mouse" device
+  if (game_name %in% c("注意警觉", "注意指向")) {
+    raw_parsed$device <- if_else(
+      raw_parsed$resp == "right",
+      "keyboard",
+      raw_parsed$device
+    )
   }
   raw_parsed$device |>
     str_c(collapse = "-") |>
