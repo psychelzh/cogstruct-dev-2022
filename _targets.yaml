@@ -4,3 +4,6 @@
 '2023':
   script: _targets_2023.R
   store: _targets/2023
+g_invariance:
+  script: _targets_g_invariance.R
+  store: _targets/g_invariance
