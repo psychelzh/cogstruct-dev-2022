@@ -7,7 +7,8 @@ tar_option_set(
   format = "qs",
   imports = "preproc.iquizoo",
   memory = "transient",
-  garbage_collection = TRUE
+  garbage_collection = TRUE,
+  controller = crew::crew_controller_local(workers = 10)
 )
 search_games_mem <- memoise::memoise(
   tarflow.iquizoo::search_games,
@@ -75,29 +76,23 @@ list(
   tarchetypes::tar_file_read(
     config_indices,
     "config/indices_filtering_2023.csv",
-    read = read_csv(!!.x, show_col_types = FALSE)
+    read = read_csv(!!.x, show_col_types = FALSE) |>
+      filter(!is.na(dimension)) |>
+      mutate(game_index = str_c(game_name_abbr, index_name, sep = "."))
   ),
   tar_target(
     indices_of_interest,
-    indices_clean |>
-      left_join(
-        config_indices,
+    config_indices |>
+      inner_join(
+        indices_clean,
         join_by(game_name, game_name_abbr, index_name)
       ) |>
-      filter(!is.na(dimension)) |>
-      mutate(score = if_else(reversed, -score, score)) |>
-      mutate(n_indices = n_distinct(index_name), .by = game_id) |>
+      mutate(score_adj = if_else(reversed, -score, score)) |>
       mutate(
-        game_index = if_else(
-          n_indices == 2,
-          str_c(game_name_abbr, index_name, sep = "."),
-          game_name_abbr
-        )
-      ) |>
-      pivot_wider(
-        id_cols = user_id,
-        names_from = game_index,
-        values_from = score
+        is_outlier_iqr = score |>
+          performance::check_outliers(method = "iqr") |>
+          unclass(),
+        .by = game_index
       )
   )
 )
