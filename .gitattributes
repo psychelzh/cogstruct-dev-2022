@@ -1,4 +1,2 @@
-docs/site_libs/* linguist-vendored
-docs/*.html linguist-vendored
 *.qmd linguist-language=R
 *.Rmd linguist-language=R
