@@ -11,9 +11,3 @@ predict_g_score <- function(data, mdl, id_cols = 1) {
     g = lavPredict(mdl)[, 1]
   )
 }
-
-clean_combined <- function(df, name, to) {
-  df |>
-    mutate(id = str_remove(id, name)) |>
-    separate(id, c(NA, to), convert = TRUE)
-}
