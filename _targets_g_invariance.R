@@ -11,57 +11,11 @@ tar_option_set(
 )
 tar_source()
 future::plan(future.callr::callr)
-
-max_num_vars <- 77
-cfg_rsmp_vars <- withr::with_seed(
-  1,
-  tidyr::expand_grid(
-    num_vars = round(seq(3, floor(max_num_vars / 2), length.out = 10)),
-    idx_rsmp = seq_len(100)
-  ) |>
-    dplyr::reframe(
-      purrr::map(
-        num_vars,
-        ~ data.frame(
-          id_pairs = rep(c(1, 2), .),
-          idx_vars = sample.int(max_num_vars, . * 2, replace = FALSE)
-        )
-      ) |>
-        purrr::list_rbind(),
-      .by = c(num_vars, idx_rsmp)
-    ) |>
-    tidyr::chop(idx_vars) |>
-    tidyr::chop(c(idx_rsmp, idx_vars))
+g_invariance <- targets_sample_tasks(77, data)
+g_invariance_random <- targets_sample_tasks(
+  77, data_random,
+  name_suffix = "_random"
 )
-g_invariance <- tarchetypes::tar_map(
-  values = cfg_rsmp_vars,
-  names = c(num_vars, id_pairs),
-  tar_target(
-    data_names,
-    tibble(
-      idx_rsmp = idx_rsmp, # use this to track samples
-      tasks = map(idx_vars, ~ data_names_all[.])
-    ),
-    deployment = "main"
-  ),
-  tar_target(
-    mdl_fitted,
-    data_names |>
-      mutate(
-        mdl = map(tasks, ~ fit_g(data, all_of(.))),
-        .keep = "unused"
-      )
-  ),
-  tar_target(
-    scores_g,
-    mdl_fitted |>
-      mutate(
-        scores = map(mdl, ~ predict_g_score(data, .)),
-        .keep = "unused"
-      )
-  )
-)
-
 list(
   tarchetypes::tar_file_read(
     indices_of_interest,
@@ -97,7 +51,6 @@ list(
         values_from = score_adj
       )
   ),
-  tar_target(data_names_all, names(data)[-1]),
   g_invariance,
   tarchetypes::tar_combine(
     scores_g,
@@ -135,6 +88,40 @@ list(
             summarise(r_rapm = cor(g, RAPM, use = "pairwise"))
         ) |>
           list_rbind(),
+        .keep = "unused"
+      )
+  ),
+  # random data checking
+  tar_target(
+    data_random,
+    rnorm(500 * 77) |>
+      matrix(nrow = 500) |>
+      as.data.frame() |>
+      mutate(user_id = seq_len(n()), .before = 1L)
+  ),
+  g_invariance_random,
+  tarchetypes::tar_combine(
+    scores_g_random,
+    g_invariance_random$scores_g_random,
+    command = bind_rows(!!!.x, .id = "id") |>
+      clean_combined(
+        "scores_g_random",
+        c("num_vars", "id_pairs")
+      )
+  ),
+  tar_target(
+    scores_g_cor_pairwise_random,
+    scores_g_random |>
+      pivot_wider(
+        id_cols = c(num_vars, idx_rsmp),
+        names_from = id_pairs,
+        values_from = scores
+      ) |>
+      mutate(
+        r = map2_dbl(
+          `1`, `2`,
+          ~ cor(.x$g, .y$g, use = "pairwise")
+        ),
         .keep = "unused"
       )
   )
