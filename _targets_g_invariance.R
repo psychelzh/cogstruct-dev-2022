@@ -52,15 +52,7 @@ list(
       )
   ),
   g_invariance,
-  tarchetypes::tar_combine(
-    scores_g,
-    g_invariance$scores_g,
-    command = bind_rows(!!!.x, .id = "id") |>
-      clean_combined(
-        "scores_g",
-        c("num_vars", "id_pairs")
-      )
-  ),
+  combine_targets(scores_g, g_invariance, c("num_vars", "id_pairs")),
   tar_target(
     scores_g_cor_pairwise,
     scores_g |>
@@ -100,14 +92,10 @@ list(
       mutate(user_id = seq_len(n()), .before = 1L)
   ),
   g_invariance_random,
-  tarchetypes::tar_combine(
+  combine_targets(
     scores_g_random,
-    g_invariance_random$scores_g_random,
-    command = bind_rows(!!!.x, .id = "id") |>
-      clean_combined(
-        "scores_g_random",
-        c("num_vars", "id_pairs")
-      )
+    g_invariance_random,
+    c("num_vars", "id_pairs")
   ),
   tar_target(
     scores_g_cor_pairwise_random,

@@ -59,8 +59,14 @@ targets_sample_tasks <- function(num_tasks, data,
   )
 }
 
-clean_combined <- function(df, name, to) {
-  df |>
-    mutate(id = str_remove(id, name)) |>
-    separate(id, c(NA, to), convert = TRUE)
+combine_targets <- function(name, targets, cols_targets) {
+  name <- deparse1(substitute(name))
+  tarchetypes::tar_combine_raw(
+    name,
+    targets[[name]],
+    command = bind_rows(!!!.x, .id = "id") |>
+      mutate(id = str_remove(id, .(name))) |>
+      separate(id, c(NA, .(cols_targets)), convert = TRUE) |>
+      bquote()
+  )
 }
