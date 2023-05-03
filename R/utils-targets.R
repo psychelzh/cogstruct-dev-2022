@@ -28,33 +28,30 @@ targets_sample_tasks <- function(num_tasks, data,
     names = c(num_vars, id_pairs),
     tar_target_raw(
       paste0("data_names", name_suffix),
-      substitute(
-        tibble(
-          idx_rsmp = idx_rsmp, # use this to track samples
-          tasks = map(idx_vars, ~ names(data)[-name_id_col][.])
-        )
-      ),
+      tibble(
+        idx_rsmp = idx_rsmp, # use this to track samples
+        tasks = map(idx_vars, ~ names(data)[-name_id_col][.])
+      ) |>
+        substitute(),
       deployment = "main"
     ),
     tar_target_raw(
       paste0("mdl_fitted", name_suffix),
-      bquote(
+      .(as.name(paste0("data_names", name_suffix))) |>
         mutate(
-          .(as.name(paste0("data_names", name_suffix))),
           mdl = map(tasks, ~ fit_g(.(substitute(data)), all_of(.))),
           .keep = "unused"
-        )
-      )
+        ) |>
+        bquote()
     ),
     tar_target_raw(
       paste0("scores_g", name_suffix),
-      bquote(
+      .(as.name(paste0("mdl_fitted", name_suffix))) |>
         mutate(
-          .(as.name(paste0("mdl_fitted", name_suffix))),
           scores = map(mdl, ~ predict_g_score(.(substitute(data)), .)),
           .keep = "unused"
-        )
-      )
+        ) |>
+        bquote()
     )
   )
 }
