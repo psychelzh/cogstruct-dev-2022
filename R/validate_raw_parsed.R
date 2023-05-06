@@ -44,8 +44,7 @@ check_version <- function(data) {
       ver_major = game_version |>
         str_extract("\\d+\\.\\d+\\.\\d+") |>
         numeric_version() |>
-        #TODO: could be _[, 1] in future release of R
-        (\(.) .[, 1])()
+        _[, 1]
     ) |>
     filter(
       case_when(
